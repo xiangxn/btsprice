@@ -22,7 +22,8 @@
         "common": "excute the order book, get the real price",
         "spread": 0.01,
         "common": "we use the average price in this time",
-        "filter_minute": 30
+        "filter_minute": 30,
+        "check_blackswan": 0
     },
     "market_weight": {
         "btsbots_cny": 1.0,
