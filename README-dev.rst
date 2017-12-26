@@ -14,7 +14,7 @@ Instructions
 ------------
 #. Clone the project ::
 
-        git clone git@github.com:pch957/btsprice.git
+        git clone git@github.com:xiangxn/btsprice.git
         cd btsprice
 
 #. Install the project's development and runtime requirements::
@@ -85,4 +85,4 @@ Please report any bugs or requests that you have using the GitHub issue tracker!
 Authors
 =======
 
-* Alt
+* Alt,Necklace

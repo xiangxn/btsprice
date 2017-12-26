@@ -8,11 +8,11 @@ Information describing the project.
 package = 'btsprice'
 project = "btsprice"
 project_no_spaces = project.replace(' ', '')
-version = '0.2.56'
+version = '0.2.58'
 description = 'get price for BitShares'
-authors = ['Alt']
+authors = ['Necklace']
 authors_string = ', '.join(authors)
-emails = ['pch957@163.com']
+emails = ['xiangxn@163.com']
 license = 'MIT'
 copyright = '2015 ' + authors_string
-url = 'https://github.com/pch957/btsprice'
+url = 'https://github.com/xiangxn/btsprice'
