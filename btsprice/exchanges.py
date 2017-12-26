@@ -74,16 +74,19 @@ class Exchanges():
     @asyncio.coroutine
     def orderbook_btsbots(self, quote="CNY", base="BTS"):
         try:
-            url = "https://btsbots.com/api/order?max_results=100&where="
+            #url = "https://btsbots.com/api/order?max_results=100&where="
             # url = "http://localhost:5000/api/order?max_results=30&where="
-            params = "a_s==%s;a_b==%s" % (base, quote)
+            url = "https://s3.amazonaws.com/roelandp-nl/btsbots-api-result/"
+            #params = "a_s==%s;a_b==%s" % (base, quote);
+            params = "%s-%s.json" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(
                 url+params), 120)
             result = yield from response.json()
             order_book_ask = []
             for _o in result["_items"]:
                 order_book_ask.append([_o['p'], _o['b_s']])
-            params = "a_s==%s;a_b==%s" % (quote, base)
+            #params = "a_s==%s;a_b==%s" % (quote, base)
+            params = "%s-%s.json" % (quote, base)
             response = yield from asyncio.wait_for(self.session.get(
                 url+params), 120)
             result = yield from response.json()
@@ -93,7 +96,7 @@ class Exchanges():
             return {
                 "bids": order_book_bid, "asks": order_book_ask}
         except:
-            print("Error fetching book from btsbots!")
+            print("Error fetching book from btsbots - roelandp mod ! - "+ quote)
 
     @asyncio.coroutine
     def orderbook_poloniex(self, quote="btc", base="bts"):
