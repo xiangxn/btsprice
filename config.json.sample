@@ -28,13 +28,15 @@
     "market_weight": {
         "btsbots_cny": 1.0,
         "btsbots_usd": 1.0,
-        "btsbots_open.btc": 1.0,
-        "aex_btc": 1.0,
+        "btsbots_open.btc": 0.5,
+        "aex_btc": 0.5,
+        "aex_bitcny": 1.0,
+        "aex_bitsud": 1.0,
         "zb_usdt": 1.0,
-        "zb_btc": 1.0,
-        "lbank_btc": 1.0,
-        "binance_btc": 1.0,
-        "poloniex_btc": 1.0
+        "zb_btc": 0.5,
+        "lbank_btc": 0.5,
+        "binance_btc": 0.5,
+        "poloniex_btc": 0.5
     },
     "asset_config": {
         "default": {
