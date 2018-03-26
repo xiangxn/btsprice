@@ -2,6 +2,7 @@
 from btsprice.exchanges import Exchanges
 from btsprice.yahoo import Yahoo
 from btsprice.sina import Sina
+from btsprice.magicwallet import Magicwallet
 import time
 import asyncio
 
