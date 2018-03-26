@@ -236,6 +236,9 @@ class BTSPriceAfterMatch(object):
                 valid_depth[market]["ask_volume"] += order[1]
         return valid_depth
 
+    def get_magic_rate(self):
+        return self.data["magic"]["Magicwallet"]
+
 if __name__ == "__main__":
     import asyncio
     from btsprice.task_exchanges import TaskExchanges

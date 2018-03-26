@@ -7,13 +7,14 @@ import asyncio
 
 
 class TaskExchanges(object):
-    def __init__(self, data={}):
+    def __init__(self, data={}, magicwalletkey = ''):
         self.period = 120
         self.exchanges = Exchanges()
         self.yahoo = Yahoo()
         self.sina = Sina()
+        self.magicwallet = Magicwallet(magicwalletkey)
         self.handler = None
-        data_type = ["orderbook", "ticker", "rate"]
+        data_type = ["orderbook", "ticker", "rate", "magic"]
         for _type in data_type:
             if _type not in data:
                 data[_type] = {}
@@ -101,6 +102,27 @@ class TaskExchanges(object):
                 time_left = 1
             time_end += time_left
             yield from asyncio.sleep(time_left)
+    
+    @asyncio.coroutine
+    def fetch_magicwallet_rate(self):
+        time_end = int(time.time())
+        magic = self.data["magic"]
+        while True:
+            time_begin = time_end
+            _magic = yield from self.magicwallet.get_changerate()
+            time_end = int(time.time())
+            if _magic: 
+                magic["Magicwallet"] = _magic
+                if self.handler:
+                    self.handler("magic", "Magicwallet", _magic)
+            time_left = self.period - (time_end - time_begin)
+            if time_left <= 1:
+                time_left = 1
+            time_end += time_left
+            yield from asyncio.sleep(time_left)
+
+    def run_task_magicwallet(self,loop):
+        return [loop.create_task(self.fetch_magicwallet_rate())]
 
     def run_tasks_ticker(self, loop):
         return [
@@ -197,7 +219,8 @@ class TaskExchanges(object):
                 loop.create_task(self.fetch_sina_rate())
                 ] + \
             self.run_tasks_orderbook(loop) + \
-            self.run_tasks_ticker(loop)
+            self.run_tasks_ticker(loop) + \
+            self.run_task_magicwallet(loop)
 
 
 if __name__ == "__main__":
