@@ -28,17 +28,17 @@ class Magicwallet():
                     wbitcny = float(pricelist['withdrawBitCNY'])
                     rfiatcny = float(pricelist['depositFiatCNY'])
                     wfiatcny = float(pricelist['withdrawFiatCNY'])
-                    if (rfiatcny+wfiatcny) == 0:
+                    if (rfiatcny + wfiatcny) == 0:
                         for pricelist24 in result:
                             if pricelist24['datatype'] == '24h':
                                 rbitcny = float(pricelist24['depositBitCNY'])
                                 wbitcny = float(pricelist24['withdrawBitCNY'])
                                 rfiatcny = float(pricelist24['depositFiatCNY'])
                                 wfiatcny = float(pricelist24['withdrawFiatCNY'])
-                                if (rfiatcny+wfiatcny) == 0:
+                                if (rfiatcny + wfiatcny) == 0:
                                     wantpricerate = 1 
                                 else:
-                                    wantpricerate = round(float((rbitcny + wbitcny) / (rbitcny + wbitcny)),2)
+                                    wantpricerate = round(float((rfiatcny + wfiatcny) / (rbitcny + wbitcny)),2)
                     else:
                         wantpricerate = float((rfiatcny + wfiatcny) / (rbitcny + wbitcny))
             print(wantpricerate) 
