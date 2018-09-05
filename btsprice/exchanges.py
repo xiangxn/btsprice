@@ -16,7 +16,7 @@ class Exchanges():
         self.order_types = ["bids", "asks"]
 
     @asyncio.coroutine
-    def orderbook_aex(self, quote="btc", base="bts"):
+    def orderbook_aex(self, quote="cnc", base="bts"):
         try:
             url = "http://api.aex.com/depth.php"
             params = {'c': base, 'mk_type': quote}
