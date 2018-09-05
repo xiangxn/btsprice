@@ -154,10 +154,13 @@ class FeedPrice(object):
         price_mode = self.config["price_mode"]
         if price_mode == 1:
            self.filter_price = self.get_average_price(bts_price_in_cny)
+           print("price_mode:average")
         elif price_mode == 2:
            self.filter_price = self.get_median_price(bts_price_in_cny)
+           print("price_mode:median")
         else:
            self.filter_price = self.get_max_price(bts_price_in_cny)
+           print("price_mode:max")
 
     def get_median_price(self, bts_price_in_cny):
         median_price = {}
@@ -322,6 +325,7 @@ class FeedPrice(object):
           tmp = 1 + tmp
        for oneprice in price:
           ready_publish[oneprice] = price[oneprice] * tmp
+       print(price)
        if ready_publish:
           return ready_publish
        else:
