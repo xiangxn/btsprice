@@ -154,13 +154,10 @@ class FeedPrice(object):
         price_mode = self.config["price_mode"]
         if price_mode == 1:
            self.filter_price = self.get_average_price(bts_price_in_cny)
-           print("price_mode:average")
         elif price_mode == 2:
            self.filter_price = self.get_median_price(bts_price_in_cny)
-           print("price_mode:median")
         else:
            self.filter_price = self.get_max_price(bts_price_in_cny)
-           print("price_mode:max")
 
     def get_median_price(self, bts_price_in_cny):
         median_price = {}
@@ -236,7 +233,16 @@ class FeedPrice(object):
         print(t.get_string())
 
     def display_price(self):
+        price_mode = self.config["price_mode"]
         t = PrettyTable([
+            "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
+            "max(/BTS)", "max(BTS/)", "my feed"])
+        if price_mode == 1:
+           t = PrettyTable([
+            "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
+            "average(/BTS)", "average(BTS/)", "my feed"])
+        elif price_mode == 2:
+           t = PrettyTable([
             "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
             "median(/BTS)", "median(BTS/)", "my feed"])
         t.align = 'r'
