@@ -11,7 +11,6 @@ from btsprice import metadata
 from btsprice.feedprice import FeedPrice
 import json
 
-
 def main(argv):
     """Program entry point.
 

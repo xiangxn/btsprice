@@ -151,7 +151,13 @@ class FeedPrice(object):
             price["HANGSENG"] /= price["HKD"]
 
     def price_filter(self, bts_price_in_cny):
-        self.filter_price = self.get_average_price(bts_price_in_cny)
+        price_mode = self.config["price_mode"]
+        if price_mode == 1:
+           self.filter_price = self.get_average_price(bts_price_in_cny)
+        elif price_mode == 2:
+           self.filter_price = self.get_median_price(bts_price_in_cny)
+        else:
+           self.filter_price = self.get_max_price(bts_price_in_cny)
 
     def get_median_price(self, bts_price_in_cny):
         median_price = {}
@@ -165,8 +171,31 @@ class FeedPrice(object):
                 self.price_queue[asset].pop(0)
             median_price[asset] = sorted(
                 self.price_queue[asset])[int(len(self.price_queue[asset]) / 2)]
+        for asset in list(self.alias):
+            alias = self.alias[asset]
+            if alias in median_price:
+                median_price[asset] = median_price[alias]
         self.patch_nasdaqc(median_price)
         return median_price
+
+    def get_max_price(self, bts_price_in_cny):
+        max_price = {}
+        for asset in self.price_queue:
+            if asset not in self.bts_price.rate_cny or \
+                    self.bts_price.rate_cny[asset] is None:
+                continue
+            self.price_queue[asset].append(bts_price_in_cny
+                                           / self.bts_price.rate_cny[asset])
+            if len(self.price_queue[asset]) > self.sample:
+                self.price_queue[asset].pop(0)
+            max_price[asset] = sorted(
+                self.price_queue[asset])[int(len(self.price_queue[asset]) - 1)]
+        for asset in list(self.alias):
+            alias = self.alias[asset]
+            if alias in max_price:
+                max_price[asset] = max_price[alias]
+        self.patch_nasdaqc(max_price)
+        return max_price
 
     def get_average_price(self, bts_price_in_cny):
         average_price = {}
@@ -281,8 +310,29 @@ class FeedPrice(object):
         else:
             return real_price
 
+    def price_negative_feedback(self, price):
+       ready_publish = {}
+       self.magicrate = self.bts_price.get_magic_rate()
+       limit = self.config["negative_feedback_limit"]
+       tmp = self.magicrate - 1
+       tmp = min(tmp,limit)
+       if tmp == 0:
+          tmp = 1
+       else:
+          tmp = 1 + tmp
+       for oneprice in price:
+          ready_publish[oneprice] = price[oneprice] * tmp
+       if ready_publish:
+          return ready_publish
+       else:
+          return price
+
     def task_publish_price(self):
-        self.filter_price = self.price_add_by_magicwallet(self.filter_price)
+        nf = self.config["negative_feedback"]
+        if nf == 1:
+           self.filter_price = self.price_negative_feedback(self.filter_price)
+        else:
+           self.filter_price = self.price_add_by_magicwallet(self.filter_price)
         print(self.filter_price)
         if not self.config["witness"]:
             return

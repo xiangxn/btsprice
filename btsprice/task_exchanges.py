@@ -110,7 +110,7 @@ class TaskExchanges(object):
         magic = self.data["magic"]
         while True:
             time_begin = time_end
-            _magic = yield from self.magicwallet.get_changerate()
+            _magic, rbitcny = yield from self.magicwallet.get_changerate()
             time_end = int(time.time())
             if _magic: 
                 magic["Magicwallet"] = _magic
