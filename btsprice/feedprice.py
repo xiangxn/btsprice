@@ -323,6 +323,7 @@ class FeedPrice(object):
           tmp = 1
        else:
           tmp = 1 + tmp
+      print("premium:%s" %(tmp - 1))
        for oneprice in price:
           ready_publish[oneprice] = price[oneprice] * tmp
        print(price)
