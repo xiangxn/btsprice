@@ -4,6 +4,7 @@
     "maigcwalletrate":0.4,
     "magicwalletkey":"",
     "price_mode":3,
+    "price_coefficient":2,
     "negative_feedback": 1,
     "negative_feedback_limit": 0.1,
     "asset_list": [
