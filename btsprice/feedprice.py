@@ -322,9 +322,11 @@ class FeedPrice(object):
     def price_negative_feedback(self, price):
        ready_publish = {}
        self.magicrate = self.bts_price.get_magic_rate()
-       limit = self.config["negative_feedback_limit"]
+       fmax = self.config["negative_feedback_max"]
+       fmin = self.config["negative_feedback_min"]
        tmp = (1 - self.magicrate) ** self.config["price_coefficient"]
-       tmp = min(tmp,limit)
+       tmp = min(tmp, fmax)
+       tmp = max(tmp, fmin)
        if tmp == 0:
           tmp = 1
        else:
