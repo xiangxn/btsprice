@@ -47,7 +47,7 @@ class FeedPrice(object):
             self.alias = self.config['alias']
         else:
             self.alias = {}
-        self.lasttate = self.config["negative_feedback_rate"]
+        self.lastrate = self.config["negative_feedback_rate"]
 
     def init_config(self, config):
         if config:
@@ -323,17 +323,19 @@ class FeedPrice(object):
     def price_negative_feedback(self, price):
        ready_publish = {}
        self.magicrate = self.bts_price.get_magic_rate()
-       print("premium:%.8f" %(self.magicrate))
+       print("magicrate:%.8f" %(self.magicrate))
+       print("premium:%.8f" %(1 - self.magicrate))
+       print("lastrate:%.8f" %(self.lastrate))
        # fmax = self.config["negative_feedback_max"]
        # fmin = self.config["negative_feedback_min"]
        # frate = self.config["negative_feedback_rate"]
        rate = (1 - self.magicrate) * self.config["price_coefficient"]
-       rate = self.lasttate - rate
-       self.lasttate = rate
+       rate = self.lastrate - rate
+       self.lastrate = rate
        # rate = min(rate, fmax)
        # rate = max(rate, fmin)
        if rate == 0:
-          self.lasttate = self.config["negative_feedback_rate"]
+          self.lastrate = self.config["negative_feedback_rate"]
           rate = 1
        else:
           rate = 1 + rate
