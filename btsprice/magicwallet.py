@@ -41,7 +41,7 @@ class Magicwallet():
                                     wantpricerate = round(float((rfiatcny + wfiatcny) / (rbitcny + wbitcny)),2)
                     else:
                         wantpricerate = float((rfiatcny + wfiatcny) / (rbitcny + wbitcny))
-            print(wantpricerate) 
+            print("premium:%.8f" %(wantpricerate))
             return wantpricerate
         except Exception as e:
             print("Error fetching book from binance!")
