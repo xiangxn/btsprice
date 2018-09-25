@@ -327,13 +327,12 @@ class FeedPrice(object):
        print("premium:%.8f" %(1 - self.magicrate))
        print("lastrate:%.8f" %(self.lastrate))
        # fmax = self.config["negative_feedback_max"]
-       # fmin = self.config["negative_feedback_min"]
+       fmin = self.config["negative_feedback_min"]
        # frate = self.config["negative_feedback_rate"]
        rate = (1 - self.magicrate) * self.config["price_coefficient"]
        rate = self.lastrate - rate
+       rate = max(rate, fmin)
        self.lastrate = rate
-       # rate = min(rate, fmax)
-       # rate = max(rate, fmin)
        if rate == 0:
           self.lastrate = self.config["negative_feedback_rate"]
           rate = 1

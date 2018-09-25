@@ -6,7 +6,8 @@
     "price_mode":3,
     "price_coefficient":2,
     "negative_feedback": 1,
-    "negative_feedback_rate": 0.1,
+    "negative_feedback_rate": 0.15,
+    "negative_feedback_min":0.1
     "asset_list": [
         "BTC", "SILVER", "GOLD", "TRY", "SGD", "HKD", "NZD", "CNY",
     "MXN", "CAD", "CHF", "AUD", "GBP", "JPY", "EUR", "USD", "KRW", "TUSD", "ARS"],
