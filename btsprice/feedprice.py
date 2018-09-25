@@ -333,6 +333,7 @@ class FeedPrice(object):
        rate = self.lastrate - rate
        rate = max(rate, fmin)
        self.lastrate = rate
+       print("newrate:%.8f" %(self.lastrate))
        if rate == 0:
           self.lastrate = self.config["negative_feedback_rate"]
           rate = 1
