@@ -341,7 +341,10 @@ class FeedPrice(object):
        else:
           rate = 1 + rate
        for oneprice in price:
-          ready_publish[oneprice] = price[oneprice] * rate
+          if oneprice == "CNY":
+            ready_publish[oneprice] = price[oneprice] * rate
+          else :
+            ready_publish[oneprice] = price[oneprice]
        print(price)
        if ready_publish:
           return ready_publish
