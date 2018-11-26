@@ -313,7 +313,7 @@ class FeedPrice(object):
         mrate = self.config["maigcwalletrate"]
         print("计算公式为 原有价格*(1+(%s-1)*%s))" %(self.magicrate,mrate))
         for oneprice in real_price:
-            ready_publish[oneprice] = real_price[oneprice] * (1 + (self.magicrate - 1) * mrate)
+            ready_publish[oneprice] = real_price[oneprice] * (1 + (self.magicrate - 1) * mrate) * 1.1
         print(real_price)
         if ready_publish:
             return ready_publish
