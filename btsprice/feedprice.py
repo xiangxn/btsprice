@@ -356,9 +356,9 @@ class FeedPrice(object):
         nf = self.config["negative_feedback"]
         if nf == 1:
            self.filter_price = self.price_negative_feedback(self.filter_price)
-        else:
-           self.filter_price = self.price_add_by_magicwallet(self.filter_price)
-        print(self.filter_price)
+        # else:
+        #   self.filter_price = self.price_add_by_magicwallet(self.filter_price)
+        # print(self.filter_price)
         if not self.config["witness"]:
             return
         self.feedapi.fetch_feed()
