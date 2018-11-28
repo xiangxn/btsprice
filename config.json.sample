@@ -3,7 +3,7 @@
     "timer_minute": 2,
     "maigcwalletrate":0.4,
     "magicwalletkey":"",
-    "maigcwallet_min":1.15,
+    "black_min":1.15,
     "price_mode":3,
     "price_coefficient":2,
     "negative_feedback": 1,

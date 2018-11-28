@@ -69,7 +69,8 @@ class FeedPrice(object):
     def init_tasks(self):
         loop = asyncio.get_event_loop()
         # init task_exchanges
-        task_exchanges = TaskExchanges(self.exchange_data, self.config["magicwalletkey"])
+        task_exchanges = TaskExchanges(
+            self.exchange_data, self.config["magicwalletkey"])
         task_exchanges.set_period(int(self.config["timer_minute"])*60)
 
         # init task_pusher
@@ -154,11 +155,11 @@ class FeedPrice(object):
     def price_filter(self, bts_price_in_cny):
         price_mode = self.config["price_mode"]
         if price_mode == 1:
-           self.filter_price = self.get_average_price(bts_price_in_cny)
+            self.filter_price = self.get_average_price(bts_price_in_cny)
         elif price_mode == 2:
-           self.filter_price = self.get_median_price(bts_price_in_cny)
+            self.filter_price = self.get_median_price(bts_price_in_cny)
         else:
-           self.filter_price = self.get_max_price(bts_price_in_cny)
+            self.filter_price = self.get_max_price(bts_price_in_cny)
 
     def get_median_price(self, bts_price_in_cny):
         median_price = {}
@@ -239,13 +240,13 @@ class FeedPrice(object):
             "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
             "max(/BTS)", "max(BTS/)", "my feed"])
         if price_mode == 1:
-           t = PrettyTable([
-            "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
-            "average(/BTS)", "average(BTS/)", "my feed"])
+            t = PrettyTable([
+                "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
+                "average(/BTS)", "average(BTS/)", "my feed"])
         elif price_mode == 2:
-           t = PrettyTable([
-            "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
-            "median(/BTS)", "median(BTS/)", "my feed"])
+            t = PrettyTable([
+                "asset", "rate(CNY/)", "current(/BTS)", "current(BTS/)",
+                "median(/BTS)", "median(BTS/)", "my feed"])
         t.align = 'r'
         t.border = True
         for asset in sorted(self.filter_price):
@@ -307,14 +308,27 @@ class FeedPrice(object):
                 continue
         return need_publish
 
-    def price_add_by_magicwallet(self,real_price):
+    def price_add_by_magicwallet(self, real_price):
         ready_publish = {}
         self.magicrate = self.bts_price.get_magic_rate()
         mrate = self.config["maigcwalletrate"]
         minr = self.config["maigcwallet_min"]
-        print("计算公式为 原有价格*(1+(%s-1)*%s))" %(self.magicrate,mrate))
+        print("计算公式为 原有价格*(1+(%s-1)*%s))" % (self.magicrate, mrate))
         for oneprice in real_price:
-            ready_publish[oneprice] = real_price[oneprice] * (1 + (self.magicrate - 1) * mrate) * minr
+            ready_publish[oneprice] = real_price[oneprice] * \
+                (1 + (self.magicrate - 1) * mrate) * minr
+        print(real_price)
+        if ready_publish:
+            return ready_publish
+        else:
+            return real_price
+
+    def price_add_by_black(self, real_price):
+        ready_publish = {}
+        minr = self.config["black_min"]
+        for oneprice in real_price:
+            if oneprice == "CNY":
+                ready_publish[oneprice] = real_price[oneprice] * minr
         print(real_price)
         if ready_publish:
             return ready_publish
@@ -322,43 +336,44 @@ class FeedPrice(object):
             return real_price
 
     def price_negative_feedback(self, price):
-       ready_publish = {}
-       self.magicrate = self.bts_price.get_magic_rate()
-       print("magicrate:%.8f" %(self.magicrate))
-       print("premium:%.8f" %(1 - self.magicrate))
-       print("lastrate:%.8f" %(self.lastrate))
-       fmax = self.config["negative_feedback_max"]
-       fmin = self.config["negative_feedback_min"]
-       # frate = self.config["negative_feedback_rate"]
-       rate = (1 - self.magicrate) * self.config["price_coefficient"]
-       rate = self.lastrate - rate
-       rate = max(rate, fmin)
-       rate = min(rate, fmax)
-       self.lastrate = rate
-       print("newrate:%.8f" %(self.lastrate))
-       if rate == 0:
-          self.lastrate = self.config["negative_feedback_rate"]
-          rate = 1
-       else:
-          rate = 1 + rate
-       for oneprice in price:
-          if oneprice == "CNY":
-            ready_publish[oneprice] = price[oneprice] * rate
-          else :
-            ready_publish[oneprice] = price[oneprice]
-       print(price)
-       if ready_publish:
-          return ready_publish
-       else:
-          return price
+        ready_publish = {}
+        self.magicrate = self.bts_price.get_magic_rate()
+        print("magicrate:%.8f" % (self.magicrate))
+        print("premium:%.8f" % (1 - self.magicrate))
+        print("lastrate:%.8f" % (self.lastrate))
+        fmax = self.config["negative_feedback_max"]
+        fmin = self.config["negative_feedback_min"]
+        # frate = self.config["negative_feedback_rate"]
+        rate = (1 - self.magicrate) * self.config["price_coefficient"]
+        rate = self.lastrate - rate
+        rate = max(rate, fmin)
+        rate = min(rate, fmax)
+        self.lastrate = rate
+        print("newrate:%.8f" % (self.lastrate))
+        if rate == 0:
+            self.lastrate = self.config["negative_feedback_rate"]
+            rate = 1
+        else:
+            rate = 1 + rate
+        for oneprice in price:
+            if oneprice == "CNY":
+                ready_publish[oneprice] = price[oneprice] * rate
+            else:
+                ready_publish[oneprice] = price[oneprice]
+        print(price)
+        if ready_publish:
+            return ready_publish
+        else:
+            return price
 
     def task_publish_price(self):
         nf = self.config["negative_feedback"]
         if nf == 1:
-           self.filter_price = self.price_negative_feedback(self.filter_price)
-        # else:
-        #   self.filter_price = self.price_add_by_magicwallet(self.filter_price)
-        # print(self.filter_price)
+            self.filter_price = self.price_negative_feedback(self.filter_price)
+        elif nf == 2:
+            self.filter_price = self.price_add_by_black(self.filter_price)
+
+        print(self.filter_price)
         if not self.config["witness"]:
             return
         self.feedapi.fetch_feed()
@@ -391,6 +406,7 @@ class FeedPrice(object):
         loop.create_task(self.run_task())
         loop.run_forever()
         loop.close()
+
 
 if __name__ == '__main__':
     feedprice = FeedPrice()
