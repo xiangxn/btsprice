@@ -329,8 +329,8 @@ class FeedPrice(object):
         for oneprice in real_price:
             if oneprice == "CNY":
                 ready_publish[oneprice] = real_price[oneprice] * minr
-            else:
-                ready_publish[oneprice] = real_price[oneprice]
+            #else:
+            #    ready_publish[oneprice] = real_price[oneprice]
         print(real_price)
         if ready_publish:
             return ready_publish
