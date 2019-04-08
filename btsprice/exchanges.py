@@ -19,7 +19,7 @@ class Exchanges():
     @asyncio.coroutine
     def orderbook_aex(self, quote="cnc", base="bts"):
         try:
-            url = "http://api.aex.com/depth.php"
+            url = "http://api.aex.plus/depth.php"
             params = {'c': base, 'mk_type': quote}
             response = yield from asyncio.wait_for(self.session.get(
                 url, params=params), 120)
@@ -614,9 +614,8 @@ class Exchanges():
 
 if __name__ == "__main__":
     import json
-    f = open("config.json.sample",encoding='utf-8')
+    f = open("config.json",encoding='utf-8')
     config = json.load(f)
-    print(config)
     loop = asyncio.get_event_loop()
     exchanges = Exchanges(config)
     @asyncio.coroutine
@@ -629,10 +628,10 @@ if __name__ == "__main__":
     tasks = [
         # loop.create_task(run_task(exchanges.orderbook_btsbots)),
         # loop.create_task(run_task(exchanges.orderbook_btsbots, "OPEN.BTC", "BTS")),
-        # loop.create_task(run_task(exchanges.orderbook_aex))
+        loop.create_task(run_task(exchanges.orderbook_aex))
         # loop.create_task(run_task(exchanges.orderbook_lbank, "BTC", "BTS"))
         #loop.create_task(run_task(exchanges.orderbook_binance))
-        loop.create_task(run_task(exchanges.orderbook_fubt))
+        #loop.create_task(run_task(exchanges.orderbook_fubt,"FBT","BTS"))
         #loop.create_task(run_task(exchanges.ticker_fubt))
         # loop.create_task(run_task(exchanges.orderbook_19800))
         # loop.create_task(run_task(exchanges.orderbook_yunbi)),
