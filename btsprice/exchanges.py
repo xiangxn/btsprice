@@ -7,13 +7,14 @@ import time
 
 
 class Exchanges():
-    def __init__(self):
+    def __init__(self,config=None):
         header = {
             'User-Agent': 'curl/7.35.0',
             'Accept': '*/*'}
 
         self.session = aiohttp.ClientSession(headers=header)
         self.order_types = ["bids", "asks"]
+        self.config = config
 
     @asyncio.coroutine
     def orderbook_aex(self, quote="cnc", base="bts"):
@@ -33,6 +34,28 @@ class Exchanges():
             return {"bids": order_book_bid, "asks": order_book_ask}
         except:
             print("Error fetching book from aex!")
+
+    @asyncio.coroutine
+    def orderbook_fubt(self, quote="FBT", base="BTS"):
+        try:
+            url = "https://api.fubt.co/v1/market/depth"
+            params = {'symbol': base+quote, 'step': 'STEP0',
+                      'accessKey':self.config['fubt_key']}
+            response = yield from asyncio.wait_for(self.session.get(
+                url, params=params), 120)
+            result = yield from response.json()
+            order_book_ask = []
+            order_book_bid = []
+            for item in result['buy']:
+                order_book_bid.append([item['price'],item['amount']])
+            for item in result['sell']:
+                order_book_ask.append([item['price'],item['amount']])
+            order_book_ask = sorted(order_book_ask)
+            order_book_bid = sorted(order_book_bid, reverse=True)
+
+            return {"bids": order_book_bid, "asks": order_book_ask}
+        except:
+            print("Error fetching book from fubt!")
 
     @asyncio.coroutine
     def orderbook_bter(self, quote="cny", base="bts"):
@@ -272,6 +295,33 @@ class Exchanges():
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
             print("Error fetching book from 19800!")
+            print(e)
+
+    @asyncio.coroutine
+    def ticker_fubt(self, quote="FBT", base="BTS"):
+        try:
+            url = "https://api.fubt.co/v1/market/ticker"
+            params = {
+                "symbol": base+quote,
+                "accessKey":self.config['fubt_key']
+                }
+            response = yield from asyncio.wait_for(self.session.get(
+                url, params=params), 120)
+            result = yield from response.json()
+            _ticker = {}
+            _ticker["last"] = result['data']["last"]
+            _ticker["vol"] = result['data']["vol24hour"]
+            _ticker["buy"] = result['data']["buy"]
+            _ticker["sell"] = result['data']["sell"]
+            _ticker["low"] = result['data']["low"]
+            _ticker["high"] = result['data']["high"]
+            for key in _ticker:
+                _ticker[key] = float(_ticker[key])
+            _ticker["time"] = int(time.time())
+            _ticker["name"] = "fubt.co"
+            return _ticker
+        except Exception as e:
+            print("Error fetching ticker from fubt.co!")
             print(e)
 
     @asyncio.coroutine
@@ -577,7 +627,8 @@ if __name__ == "__main__":
         # loop.create_task(run_task(exchanges.orderbook_btsbots, "OPEN.BTC", "BTS")),
         # loop.create_task(run_task(exchanges.orderbook_aex))
         # loop.create_task(run_task(exchanges.orderbook_lbank, "BTC", "BTS"))
-        loop.create_task(run_task(exchanges.orderbook_binance))
+        #loop.create_task(run_task(exchanges.orderbook_binance))
+        loop.create_task(run_task(exchanges.orderbook_fubt))
         # loop.create_task(run_task(exchanges.orderbook_19800))
         # loop.create_task(run_task(exchanges.orderbook_yunbi)),
         # loop.create_task(run_task(exchanges.orderbook_poloniex))

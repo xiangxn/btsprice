@@ -70,7 +70,7 @@ class FeedPrice(object):
         loop = asyncio.get_event_loop()
         # init task_exchanges
         task_exchanges = TaskExchanges(
-            self.exchange_data, self.config["magicwalletkey"])
+            self.exchange_data, self.config)
         task_exchanges.set_period(int(self.config["timer_minute"])*60)
 
         # init task_pusher

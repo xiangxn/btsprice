@@ -8,12 +8,13 @@ import asyncio
 
 
 class TaskExchanges(object):
-    def __init__(self, data={}, magicwalletkey = ''):
+    def __init__(self, data={}, config = None):
         self.period = 120
-        self.exchanges = Exchanges()
+        self.exchanges = Exchanges(config)
         self.yahoo = Yahoo()
         self.sina = Sina()
-        self.magicwallet = Magicwallet(magicwalletkey)
+        self.magicwallet = Magicwallet(config["magicwalletkey"])
+        self.config = config
         self.handler = None
         data_type = ["orderbook", "ticker", "rate", "magic"]
         for _type in data_type:
@@ -139,6 +140,9 @@ class TaskExchanges(object):
             loop.create_task(self.fetch_ticker(
                 "gdax", "USD",
                 self.exchanges.ticker_gdax, "usd", "btc")),
+            loop.create_task(self.fetch_ticker(
+                "fubt_usd", "USD",
+                self.exchanges.ticker_fubt, "USDT", "BTC")),
             # loop.create_task(self.fetch_ticker(
             #     "btcchina", "CNY",
             #     self.exchanges.ticker_btcchina, "cny", "btc")),
@@ -191,6 +195,12 @@ class TaskExchanges(object):
             loop.create_task(self.fetch_orderbook(
                 "zb_usdt", "USD",
                 self.exchanges.orderbook_zb, "usdt", "bts")),
+            loop.create_task(self.fetch_orderbook(
+                "fubt_fbt", "CNY",
+                self.exchanges.orderbook_fubt, "FBT", "BTS")),
+            loop.create_task(self.fetch_orderbook(
+                "fubt_usdt", "USD",
+                self.exchanges.orderbook_fubt, "USDT", "BTS")),
             loop.create_task(self.fetch_orderbook(
                 "lbank_btc", "BTC",
                 self.exchanges.orderbook_lbank, "btc", "bts")),
