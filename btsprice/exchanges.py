@@ -46,16 +46,17 @@ class Exchanges():
             result = yield from response.json()
             order_book_ask = []
             order_book_bid = []
-            for item in result['buy']:
+            for item in result['data']['buy']:
                 order_book_bid.append([item['price'],item['amount']])
-            for item in result['sell']:
+            for item in result['data']['sell']:
                 order_book_ask.append([item['price'],item['amount']])
             order_book_ask = sorted(order_book_ask)
             order_book_bid = sorted(order_book_bid, reverse=True)
 
             return {"bids": order_book_bid, "asks": order_book_ask}
-        except:
+        except Exception as e:
             print("Error fetching book from fubt!")
+            print(e)
 
     @asyncio.coroutine
     def orderbook_bter(self, quote="cny", base="bts"):
@@ -612,9 +613,12 @@ class Exchanges():
             print(e)
 
 if __name__ == "__main__":
+    import json
+    f = open("config.json.sample",encoding='utf-8')
+    config = json.load(f)
+    print(config)
     loop = asyncio.get_event_loop()
-    exchanges = Exchanges()
-
+    exchanges = Exchanges(config)
     @asyncio.coroutine
     def run_task(coro, *args):
         while True:
@@ -629,6 +633,7 @@ if __name__ == "__main__":
         # loop.create_task(run_task(exchanges.orderbook_lbank, "BTC", "BTS"))
         #loop.create_task(run_task(exchanges.orderbook_binance))
         loop.create_task(run_task(exchanges.orderbook_fubt))
+        #loop.create_task(run_task(exchanges.ticker_fubt))
         # loop.create_task(run_task(exchanges.orderbook_19800))
         # loop.create_task(run_task(exchanges.orderbook_yunbi)),
         # loop.create_task(run_task(exchanges.orderbook_poloniex))
