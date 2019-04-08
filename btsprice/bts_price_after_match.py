@@ -224,12 +224,14 @@ class BTSPriceAfterMatch(object):
                 "ask_price": ask_price / self.rate_cny[quote], "ask_volume": 0}
             for order in sorted(self.orderbook[market]["bids"], reverse=True):
                 if order[0] < bid_price:
+                    print(market)
                     break
                 # valid_depth[market]["bid_price"] = \
                 #     order[0] * self.rate_cny[quote]
                 valid_depth[market]["bid_volume"] += order[1]
             for order in sorted(self.orderbook[market]["asks"]):
                 if order[0] > ask_price:
+                    print(market)
                     break
                 # valid_depth[market]["ask_price"] = \
                 #     order[0] * self.rate_cny[quote]
