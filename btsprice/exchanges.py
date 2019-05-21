@@ -179,7 +179,7 @@ class Exchanges():
         try:
             quote = quote.lower()
             base = base.lower()
-            url = "http://api.zb.com/data/v1/depth"
+            url = "http://api.zb.cn/data/v1/depth"
             params = {
                 "market": "%s_%s" % (base, quote),
                 "size": 50
