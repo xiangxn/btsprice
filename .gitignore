@@ -39,3 +39,5 @@ pip-log.txt
 /paver-minilib.zip
 venv
 config.json
+.DS_Store
+.vscode/

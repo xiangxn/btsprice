@@ -96,8 +96,12 @@ class FeedApi(object):
             config["asset_config"]["default"]["maintenance_collateral_ratio"]
         self.feed_temple["maximum_short_squeeze_ratio"] = \
             config["asset_config"]["default"]["maximum_short_squeeze_ratio"]
+        self.quote_asset_id = config["asset_config"]["default"]["quote_asset_id"]
+        self.feed_temple["settlement_price"]["quote"]["asset_id"] = self.quote_asset_id
+        self.feed_temple["core_exchange_rate"]["quote"]["asset_id"] = self.quote_asset_id
         self.core_exchange_factor = \
             config["asset_config"]["default"]["core_exchange_factor"]
+        self.quote_asset = config["asset_config"]["default"]["quote_asset"]
         self.custom = config["asset_config"]
 
     def init_chain_info(self):
@@ -107,7 +111,7 @@ class FeedApi(object):
         self.fetch_asset_info()
         self.fetch_feed()
 
-    def encode_feed(self, asset, price, custom={}):
+    def encode_feed(self, asset, price, bts_price, custom={}):
         feed_info = self.feed_temple.copy()
         feed_info["settlement_price"]["base"]["asset_id"] = \
             self.asset_info[asset]["id"]
@@ -119,35 +123,52 @@ class FeedApi(object):
         if "maximum_short_squeeze_ratio" in custom:
             feed_info["maximum_short_squeeze_ratio"] = \
                 custom["maximum_short_squeeze_ratio"]
-
-        quote_precision = self.asset_info["BTS"]["precision"]
+        
+        bts_quote_precision = self.asset_info[self.quote_asset]["precision"]
+        if "quote_asset" in custom:
+            quote_precision = self.asset_info[custom["quote_asset"]]["precision"]
+            feed_info["settlement_price"]["quote"]["asset_id"] = custom["quote_asset_id"]
+            #feed_info["core_exchange_rate"]["quote"]["asset_id"] = custom["quote_asset_id"]
+        else:
+            quote_precision = self.asset_info[self.quote_asset]["precision"]
+            feed_info["settlement_price"]["quote"]["asset_id"] = self.quote_asset_id
+            #feed_info["core_exchange_rate"]["quote"]["asset_id"] = self.quote_asset_id
         base_precision = self.asset_info[asset]["precision"]
-        price_settle = price * 10**(base_precision - quote_precision)
         if "core_exchange_factor" in custom:
             core_exchange_factor = custom["core_exchange_factor"]
         else:
             core_exchange_factor = self.core_exchange_factor
-        price_rate = price_settle * core_exchange_factor
-        price_settle = fractions.Fraction.from_float(
-            price_settle).limit_denominator(100000)
-        price_rate = fractions.Fraction.from_float(
-            price_rate).limit_denominator(100000)
 
-        feed_info["settlement_price"]["base"]["amount"] = \
-            price_settle.numerator
-        feed_info["settlement_price"]["quote"]["amount"] = \
-            price_settle.denominator
-        feed_info["core_exchange_rate"]["base"]["amount"] = \
-            price_rate.numerator
-        feed_info["core_exchange_rate"]["quote"]["amount"] = \
-            price_rate.denominator
+        price_settle = price * 10**(base_precision - quote_precision)
+        if feed_info["settlement_price"]["quote"]["asset_id"] == feed_info["core_exchange_rate"]["quote"]["asset_id"]:
+            price_rate = price_settle * core_exchange_factor
+        else:
+            price_rate = (bts_price * 10**(base_precision - bts_quote_precision)) * core_exchange_factor
+        price_settle = fractions.Fraction.from_float(price_settle).limit_denominator(100000)
+        price_rate = fractions.Fraction.from_float(price_rate).limit_denominator(100000)
+
+        #print("encode_feed:",price_rate,price_settle,core_exchange_factor)
+
+        feed_info["settlement_price"]["base"]["amount"] = price_settle.numerator
+        feed_info["settlement_price"]["quote"]["amount"] = price_settle.denominator
+        feed_info["core_exchange_rate"]["base"]["amount"] = price_rate.numerator
+        feed_info["core_exchange_rate"]["quote"]["amount"] = price_rate.denominator
+        
         return feed_info
 
     def get_my_feed(self):
         return self.my_feeds
 
+    def get_quote_assets(self):
+        result = []
+        c_names = list(self.custom)
+        for name in c_names:
+            if "quote_asset" in self.custom[name]:
+                result.append(self.custom[name]["quote_asset"])
+        return result
+
     def fetch_asset_info(self):
-        for asset in self.asset_list + ["BTS"] + list(self.alias):
+        for asset in self.asset_list + list(self.alias) + self.get_quote_assets():
             a = self.rpc.get_asset(asset)
             self.asset_info[asset] = a  # resolve SYMBOL
             self.asset_info[a["id"]] = a  # resolve id
@@ -188,19 +209,21 @@ class FeedApi(object):
                     self.my_feeds[asset]["price"] = self.decode_feed(
                         feed[1][1]["settlement_price"])
 
-    def publish_feed(self, feeds):
+    def publish_feed(self, feeds, bts_price):
+        print("publish_feed:",feeds)
         wallet_was_unlocked = False
 
         if self.rpc.is_locked():
             wallet_was_unlocked = True
             self.rpc.unlock(self.password)
-
+        print("begin feeds......")
         handle = self.rpc.begin_builder_transaction()
         for asset in feeds:
             custom = {}
             if asset in self.custom:
                 custom = self.custom[asset]
-            feed_info = self.encode_feed(asset, feeds[asset], custom)
+            feed_info = self.encode_feed(asset, feeds[asset], bts_price, custom)
+            #print("publish_feed:",asset,feed_info)
             self.rpc.add_operation_to_builder_transaction(
                 handle, [19, {
                     "asset_id": self.asset_info[asset]["id"],

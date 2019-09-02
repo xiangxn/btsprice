@@ -210,7 +210,7 @@ class BTSPriceAfterMatch(object):
                 price_list = price_list[int(len(price_list) / 2):]
 
         match_result = sorted(match_result, reverse=True)
-        # pprint(match_result)
+        #print(match_result)
         return match_result[0]
 
     def get_valid_depth(self, price, spread=0.01):
@@ -224,14 +224,14 @@ class BTSPriceAfterMatch(object):
                 "ask_price": ask_price / self.rate_cny[quote], "ask_volume": 0}
             for order in sorted(self.orderbook[market]["bids"], reverse=True):
                 if order[0] < bid_price:
-                    print(market)
+                    #print(market)
                     break
                 # valid_depth[market]["bid_price"] = \
                 #     order[0] * self.rate_cny[quote]
                 valid_depth[market]["bid_volume"] += order[1]
             for order in sorted(self.orderbook[market]["asks"]):
                 if order[0] > ask_price:
-                    print(market)
+                    #print(market)
                     break
                 # valid_depth[market]["ask_price"] = \
                 #     order[0] * self.rate_cny[quote]
@@ -240,6 +240,9 @@ class BTSPriceAfterMatch(object):
 
     def get_magic_rate(self):
         return self.data["magic"]["Magicwallet"]
+
+    def get_okexc2c_btc_price(self):
+        return self.data["okexc2c"]["c2cbtc"]
 
 if __name__ == "__main__":
     import asyncio

@@ -3,6 +3,7 @@ from btsprice.exchanges import Exchanges
 from btsprice.yahoo import Yahoo
 from btsprice.sina import Sina
 from btsprice.magicwallet import Magicwallet
+from btsprice.c2cbtc import C2CBTC
 import time
 import asyncio
 
@@ -14,9 +15,10 @@ class TaskExchanges(object):
         self.yahoo = Yahoo()
         self.sina = Sina()
         self.magicwallet = Magicwallet(config["magicwalletkey"])
+        self.c2cbtc = C2CBTC()
         self.config = config
         self.handler = None
-        data_type = ["orderbook", "ticker", "rate", "magic"]
+        data_type = ["orderbook", "ticker", "rate", "magic", "okexc2c"]
         for _type in data_type:
             if _type not in data:
                 data[_type] = {}
@@ -122,6 +124,27 @@ class TaskExchanges(object):
                 time_left = 1
             time_end += time_left
             yield from asyncio.sleep(time_left)
+
+    @asyncio.coroutine
+    def fetch_c2c_okex_price(self):
+        time_end = int(time.time())
+        okexc2c = self.data["okexc2c"]
+        while True:
+            time_begin = time_end
+            c2c = yield from self.c2cbtc.get_btc_price()
+            time_end = int(time.time())
+            if c2c:
+                okexc2c["c2cbtc"] = c2c
+                if self.handler:
+                    self.handler("okexc2c","c2cbtc",c2c)
+            time_left = self.period - (time_end - time_begin)
+            if time_left <= 1:
+                time_left = 1
+            time_end += time_left
+            yield from asyncio.sleep(time_left)
+
+    def run_task_okexc2c(self,loop):
+        return [loop.create_task(self.fetch_c2c_okex_price())]
 
     def run_task_magicwallet(self,loop):
         return [loop.create_task(self.fetch_magicwallet_rate())]
@@ -231,7 +254,8 @@ class TaskExchanges(object):
                 ] + \
             self.run_tasks_orderbook(loop) + \
             self.run_tasks_ticker(loop) + \
-            self.run_task_magicwallet(loop)
+            self.run_task_magicwallet(loop) + \
+            self.run_task_okexc2c(loop)
 
 
 if __name__ == "__main__":
