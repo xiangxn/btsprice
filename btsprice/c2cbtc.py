@@ -24,7 +24,7 @@ class C2CBTC():
             buy = result["data"]["buy"][0]["price"]
             sell = result["data"]["sell"][-1]["price"]
             price = (float(buy)+float(sell))/2
-            print(price)
+            #print("get_btc_price", price)
             return price
         except Exception as e:
             print("Error fetching price from c2c okex!")
