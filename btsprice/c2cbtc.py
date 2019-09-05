@@ -23,14 +23,12 @@ class C2CBTC():
             result = yield from response.json()
             buy = result["data"]["buy"][0]["price"]
             sell = result["data"]["sell"][-1]["price"]
-            price = (buy+sell)/2
-            #print(buy)
-            #print(sell)
-            #print(price)
+            price = (float(buy)+float(sell))/2
+            print(price)
             return price
         except Exception as e:
             print("Error fetching price from c2c okex!")
-            print(e)
+            print("err:", e)
 
     
 
