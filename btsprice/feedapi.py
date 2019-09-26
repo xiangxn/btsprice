@@ -113,16 +113,17 @@ class FeedApi(object):
 
     def encode_feed(self, asset, price, bts_price, custom={}):
         feed_info = self.feed_temple.copy()
-        feed_info["settlement_price"]["base"]["asset_id"] = \
-            self.asset_info[asset]["id"]
-        feed_info["core_exchange_rate"]["base"]["asset_id"] = \
-            self.asset_info[asset]["id"]
+        feed_info["settlement_price"]["base"]["asset_id"] = self.asset_info[asset]["id"]
+        feed_info["core_exchange_rate"]["base"]["asset_id"] = self.asset_info[asset]["id"]
         if "maintenance_collateral_ratio" in custom:
-            feed_info["maintenance_collateral_ratio"] = \
-                custom["maintenance_collateral_ratio"]
+            feed_info["maintenance_collateral_ratio"] = custom["maintenance_collateral_ratio"]
         if "maximum_short_squeeze_ratio" in custom:
-            feed_info["maximum_short_squeeze_ratio"] = \
-                custom["maximum_short_squeeze_ratio"]
+            feed_info["maximum_short_squeeze_ratio"] = custom["maximum_short_squeeze_ratio"]
+
+        if 'min_price' in custom:
+            pmin = float(custom["min_price"])
+            if price < pmin:
+                price = pmin
         
         bts_quote_precision = self.asset_info[self.quote_asset]["precision"]
         if "quote_asset" in custom:

@@ -298,15 +298,13 @@ class FeedPrice(object):
             if asset not in my_feeds:
                 need_publish[asset] = real_price[asset]
                 continue
-            change = fabs(my_feeds[asset]["price"] - real_price[asset]) * \
-                100.0 / my_feeds[asset]["price"]
+            change = fabs(my_feeds[asset]["price"] - real_price[asset]) * 100.0 / my_feeds[asset]["price"]
             if change >= self.config["price_limit"]["change_max"]:
                 continue
             if asset not in my_feeds:
                 need_publish[asset] = real_price[asset]
                 continue
-            if time.time() - my_feeds[asset]["timestamp"] > \
-                    self.feedapi.asset_info[asset]["feed_lifetime_sec"] - 600:
+            if time.time() - my_feeds[asset]["timestamp"] > self.feedapi.asset_info[asset]["feed_lifetime_sec"] - 600:
                 need_publish[asset] = real_price[asset]
                 continue
             if change > self.config["price_limit"]["change_min"]:
