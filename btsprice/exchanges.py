@@ -225,7 +225,7 @@ class Exchanges():
             print(e)
 
     @asyncio.coroutine
-    def orderbook_binance(self, quote="btc", base="bts"):
+    def orderbook_binance(self, quote="BTC", base="BTS"):
         try:
             quote = quote.upper()
             base = base.upper()
@@ -370,6 +370,30 @@ class Exchanges():
             return _ticker
         except Exception as e:
             print("Error fetching ticker from poloniex!")
+            print(e)
+
+    @asyncio.coroutine
+    def ticker_binance(self, quote="USDT", base="BTC"):
+        try:
+
+            url = "https://www.binancezh.com/api/v1/ticker/24hr"
+            response = yield from asyncio.wait_for(self.session.get(url), 120)
+            response = yield from response.read()
+            result = json.loads(
+                response.decode("utf-8-sig"))["%s%s" % (base,quote)]
+            _ticker = {}
+            _ticker["last"] = result["lastPrice"]
+            _ticker["vol"] = result["volume"]
+            _ticker["buy"] = result["bidPrice"]
+            _ticker["sell"] = result["askPrice"]
+            _ticker["low"] = result["lowPrice"]
+            _ticker["high"] = result["highPrice"]
+            for key in _ticker:
+                _ticker[key] = float(_ticker[key])
+            _ticker["name"] = "binance"
+            return _ticker
+        except Exception as e:
+            print("Error fetching ticker from binance!")
             print(e)
 
     @asyncio.coroutine

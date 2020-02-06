@@ -166,6 +166,9 @@ class TaskExchanges(object):
             loop.create_task(self.fetch_ticker(
                 "fubt_usd", "USD",
                 self.exchanges.ticker_fubt, "USDT", "BTC")),
+            loop.create_task(self.fetch_ticker(
+                "binance_usd", "USD",
+                self.exchanges.ticker_binance, "USDT", "BTC")),
             # loop.create_task(self.fetch_ticker(
             #     "btcchina", "CNY",
             #     self.exchanges.ticker_btcchina, "cny", "btc")),
@@ -230,6 +233,9 @@ class TaskExchanges(object):
             loop.create_task(self.fetch_orderbook(
                 "binance_btc", "BTC",
                 self.exchanges.orderbook_binance, "btc", "bts")),
+            loop.create_task(self.fetch_orderbook(
+                "binance_usdt", "USD",
+                self.exchanges.orderbook_binance, "USDT", "BTS")),
             loop.create_task(self.fetch_orderbook(
                 "poloniex_btc", "BTC",
                 self.exchanges.orderbook_poloniex, "btc", "bts"))
