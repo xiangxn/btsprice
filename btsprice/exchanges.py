@@ -376,11 +376,13 @@ class Exchanges():
     def ticker_binance(self, quote="USDT", base="BTC"):
         try:
 
-            url = "https://www.binancezh.com/api/v1/ticker/24hr"
-            response = yield from asyncio.wait_for(self.session.get(url), 120)
+            url = "https://www.binance.com/api/v1/ticker/24hr"
+            params = {
+                "symbol": "%s%s" % (base, quote)
+                }
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
-            result = json.loads(
-                response.decode("utf-8-sig"))["%s%s" % (base,quote)]
+            result = json.loads(response.decode("utf-8-sig"))
             _ticker = {}
             _ticker["last"] = result["lastPrice"]
             _ticker["vol"] = result["volume"]
