@@ -32,8 +32,8 @@ class Yahoo(object):
             self.param_s[asset] = asset + "USD=X"
 
         # todo, GOLD/SILVER wrong from yahoo
-        # self.param_s["GOLD"] = "XAUUSD=X"
-        # self.param_s["SILVER"] = "XAGUSD=X"
+        self.param_s["GOLD"] = "XAUUSD=X"
+        self.param_s["SILVER"] = "XAGUSD=X"
         for asset in self.param_s:
             self.quote[asset] = "USD"
 
@@ -41,9 +41,8 @@ class Yahoo(object):
         # todo:"OIL", GAS", "DIESEL"
         self.param_s["SHENZHEN"] = '399106.SZ'
         self.quote["SHENZHEN"] = "CNY"
-        # todo, wrong from yahoo
-        # self.param_s["SHANGHAI"] = '000001.SS'
-        # self.quote["SHANGHAI"] = "CNY"
+        self.param_s["SHANGHAI"] = '000001.SS'
+        self.quote["SHANGHAI"] = "CNY"
         self.param_s["NASDAQC"] = '^IXIC'
         self.quote["NASDAQC"] = "USD"
         self.param_s["NIKKEI"] = '^N225'
@@ -59,20 +58,23 @@ class Yahoo(object):
     def get_query_param(self, assets):
         query_string = ','.join(
             '%s' % (self.param_s[asset]) for asset in assets)
-        params = {'s': query_string, 'f': 'l1', 'e': '.csv'}
+        params = {'symbols': query_string, 'range': '1m', 'interval': '1m'}
         return params
 
     @asyncio.coroutine
     def fetch_price(self, assets=None):
         if assets is None:
             assets = self.param_s.keys()
-        url = "http://download.finance.yahoo.com/d/quotes.csv"
+        url = "https://query1.finance.yahoo.com/v7/finance/spark"
         try:
             params = self.get_query_param(assets)
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
-            response = yield from response.read()
-            price = dict(zip(assets, response.split()))
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
+            response = yield from response.json()
+            price = {}
+            for akey in assets:
+                for item in response["spark"]["result"]:
+                    if self.param_s[akey] == item['symbol']:
+                        price[akey] = item['response'][0]['meta']['regularMarketPrice']
             for asset in assets:
                 if is_float_try(price[asset]):
                     scale = 1.0
@@ -94,7 +96,7 @@ class Yahoo(object):
                         self.rate["USD"][asset] = 1/self.rate["USD"][asset]
         except Exception as e:
             print("Error fetching results from yahoo!", e)
-        # print(self.rate)
+        print(self.rate)
         return self.rate
 
 if __name__ == "__main__":

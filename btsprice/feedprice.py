@@ -274,14 +274,14 @@ class FeedPrice(object):
         #btc_price = self.bts_price.get_okexc2c_btc_price()
         #print("btc_price:",btc_price)
         if bts_price is None or volume <= 0.0:
-            print("task_get_price:return")
+            # print("task_get_price:return")
             return
         
         self.price_filter(bts_price)
         #if "GCNY" in self.feedapi.asset_list:
         #    self.filter_price["GCNY"] = btc_price
         #    self.price_queue["GCNY"][0] = btc_price
-        # os.system("clear")
+        os.system("clear")
         cur_t = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(time.time()))
         print("[%s] efficent price: %.5f CNY/BTS, depth: %s BTS" % (
             cur_t, bts_price, "{:,.0f}".format(volume)))
