@@ -15,6 +15,8 @@ import os
 from prettytable import PrettyTable
 from math import fabs
 import locale
+import json
+from pathlib import Path
 locale.setlocale(locale.LC_ALL, 'C')
 
 
@@ -279,7 +281,7 @@ class FeedPrice(object):
         #if "GCNY" in self.feedapi.asset_list:
         #    self.filter_price["GCNY"] = btc_price
         #    self.price_queue["GCNY"][0] = btc_price
-        os.system("clear")
+        # os.system("clear")
         cur_t = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(time.time()))
         print("[%s] efficent price: %.5f CNY/BTS, depth: %s BTS" % (
             cur_t, bts_price, "{:,.0f}".format(volume)))
@@ -378,6 +380,34 @@ class FeedPrice(object):
         else:
             return price
 
+    def proc_baip2(self,):
+        d_path = "./baip2.data.json"
+        price_data = {}
+        if Path(d_path).is_file():
+            datafile = open(d_path,"r")
+            price_data = json.load(datafile)
+        max_item = int(60/self.config['timer_minute']*48)
+        # print(max_item)
+        for symbol in self.filter_price:
+            if symbol in price_data:
+                p = 0
+                c = len(price_data[symbol])
+                for price in price_data[symbol]:
+                    p += price
+                po = p / c
+                last_p = self.filter_price[symbol]
+                self.filter_price[symbol] = max(last_p,po)
+                if c >= max_item:
+                    tmp = price_data[symbol][1:]
+                    tmp.append(last_p)
+                    price_data[symbol] = tmp
+                else:
+                    price_data[symbol].append(last_p)
+            else:
+                price_data[symbol] = [self.filter_price[symbol]]
+        with open(d_path,"w") as f:
+            json.dump(price_data,f)
+
     def task_publish_price(self):
         nf = self.config["negative_feedback"]
         if nf == 1:
@@ -389,6 +419,7 @@ class FeedPrice(object):
         if not self.config["witness"]:
             return
         self.feedapi.fetch_feed()
+        self.proc_baip2()
         #print("task_publish_price",self.filter_price)
         feed_need_publish = self.check_publish(
             self.feedapi.asset_list + list(self.alias),
