@@ -381,11 +381,11 @@ class FeedPrice(object):
             return price
         
     def get_asset_config(self, symbol):
-        cnf = None
+        cnf = self.config['asset_config']['default']
         if symbol in self.config['asset_config']:
-            cnf = self.config['asset_config'][symbol]
-        else:
-            cnf = self.config['asset_config']['default']
+            tmp = self.config['asset_config'][symbol]
+            for k in tmp.keys():
+                cnf[k] = tmp[k]
         return cnf
 
     def proc_baip2(self,):
