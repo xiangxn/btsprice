@@ -447,7 +447,7 @@ class FeedPrice(object):
                 if self.filter_price:
                     self.task_publish_price()
             except Exception as e:
-                print(e)
+                print("feedprice error:", e)
                 self.logger.exception(e)
             if self.filter_price:
                 timer = config_timer
