@@ -56,7 +56,8 @@
             "maximum_short_squeeze_ratio": 1100,
             "quote_asset": "BTS",
             "quote_asset_id": "1.3.0",
-            "min_price":0
+            "min_price":0,
+            "use_baip2":0
         },
         "GCNY": {
             "core_exchange_factor": 1.20,

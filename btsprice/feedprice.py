@@ -379,6 +379,14 @@ class FeedPrice(object):
             return ready_publish
         else:
             return price
+        
+    def get_asset_config(self, symbol):
+        cnf = None
+        if symbol in self.config['asset_config']:
+            cnf = self.config['asset_config'][symbol]
+        else:
+            cnf = self.config['asset_config']['default']
+        return cnf
 
     def proc_baip2(self,):
         d_path = "./baip2.data.json"
@@ -396,7 +404,8 @@ class FeedPrice(object):
                     p += price
                 po = p / c
                 last_p = self.filter_price[symbol]
-                self.filter_price[symbol] = max(last_p,po)
+                if self.get_asset_config(symbol)['use_baip2'] > 0:
+                    self.filter_price[symbol] = max(last_p,po)
                 if c >= max_item:
                     tmp = price_data[symbol][1:]
                     tmp.append(last_p)
