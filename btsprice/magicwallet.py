@@ -44,8 +44,7 @@ class Magicwallet():
             print("premium:%.8f" %(wantpricerate))
             return wantpricerate
         except Exception as e:
-            print("Error fetching book from icowallet!")
-            print(e)
+            print("Error fetching book from icowallet!",e)
             return 1
 
 

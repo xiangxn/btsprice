@@ -18,7 +18,7 @@ class C2CBTC():
     def get_btc_price(self):
         try:
             url = "https://www.okex.com/v3/c2c/tradingOrders/book?t=%s&side=all&baseCurrency=btc&quoteCurrency=cny&userType=certified&paymentMethod=all" % int(round(time.time() * 1000))
-            #print(url)
+            # print(url)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             result = yield from response.json()
             buy = result["data"]["buy"][0]["price"]

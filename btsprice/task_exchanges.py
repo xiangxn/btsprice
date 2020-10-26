@@ -14,7 +14,7 @@ class TaskExchanges(object):
         self.exchanges = Exchanges(config)
         self.yahoo = Yahoo()
         self.sina = Sina()
-        self.magicwallet = Magicwallet(config["magicwalletkey"])
+        # self.magicwallet = Magicwallet(config["magicwalletkey"])
         self.c2cbtc = C2CBTC()
         self.config = config
         self.handler = None
@@ -260,8 +260,8 @@ class TaskExchanges(object):
                 ] + \
             self.run_tasks_orderbook(loop) + \
             self.run_tasks_ticker(loop) + \
-            self.run_task_magicwallet(loop) + \
             self.run_task_okexc2c(loop)
+            # self.run_task_magicwallet(loop) + \
 
 
 if __name__ == "__main__":

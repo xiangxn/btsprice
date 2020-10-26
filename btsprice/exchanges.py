@@ -7,10 +7,8 @@ import time
 
 
 class Exchanges():
-    def __init__(self,config=None):
-        header = {
-            'User-Agent': 'curl/7.35.0',
-            'Accept': '*/*'}
+    def __init__(self, config=None):
+        header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36', 'Accept': '*/*'}
 
         self.session = aiohttp.ClientSession(headers=header)
         self.order_types = ["bids", "asks"]
@@ -18,11 +16,12 @@ class Exchanges():
 
     @asyncio.coroutine
     def orderbook_aex(self, quote="cnc", base="bts"):
+        print("fetching book from aex!",quote,base)
         try:
             url = "http://api.aex.plus/v3/depth.php"
             params = {'coinname': base, 'mk_type': quote}
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            # print("params: ",params)
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
             for order_type in self.order_types:
@@ -32,38 +31,34 @@ class Exchanges():
             order_book_ask = sorted(result["asks"])
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
-        except:
-            print("Error fetching book from aex!")
+        except Exception as e:
+            print("Error fetching book from aex!", e)
 
     @asyncio.coroutine
     def orderbook_fubt(self, quote="FBT", base="BTS"):
         try:
             url = "https://api.fubt.co/v1/market/depth"
-            params = {'symbol': base+quote, 'step': 'STEP0',
-                      'accessKey':self.config['fubt_key']}
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {'symbol': base + quote, 'step': 'STEP0', 'accessKey': self.config['fubt_key']}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             result = yield from response.json()
             order_book_ask = []
             order_book_bid = []
             for item in result['data']['buy']:
-                order_book_bid.append([item['price'],item['amount']])
+                order_book_bid.append([item['price'], item['amount']])
             for item in result['data']['sell']:
-                order_book_ask.append([item['price'],item['amount']])
+                order_book_ask.append([item['price'], item['amount']])
             order_book_ask = sorted(order_book_ask)
             order_book_bid = sorted(order_book_bid, reverse=True)
 
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from fubt!")
-            print(e)
+            print("Error fetching book from fubt!",e)
 
     @asyncio.coroutine
     def orderbook_bter(self, quote="cny", base="bts"):
         try:
             url = "http://data.bter.com/api/1/depth/%s_%s" % (base, quote)
-            response = yield from asyncio.wait_for(self.session.get(
-                url), 120)
+            response = yield from asyncio.wait_for(self.session.get(url), 120)
             result = yield from response.json()
             for order_type in self.order_types:
                 for order in result[order_type]:
@@ -79,9 +74,8 @@ class Exchanges():
     def orderbook_yunbi(self, quote="cny", base="bts"):
         try:
             url = "https://yunbi.com/api/v2/depth.json"
-            params = {'market': base+quote, 'limit': 20}
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {'market': base + quote, 'limit': 20}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             result = yield from response.json()
             for order_type in self.order_types:
                 for order in result[order_type]:
@@ -90,8 +84,7 @@ class Exchanges():
             order_book_ask = sorted(result["asks"])
             order_book_bid = sorted(result["bids"], reverse=True)
             time = int(result["timestamp"])
-            return {
-                "bids": order_book_bid, "asks": order_book_ask, "time": time}
+            return {"bids": order_book_bid, "asks": order_book_ask, "time": time}
         except:
             print("Error fetching book from yunbi!")
 
@@ -103,24 +96,21 @@ class Exchanges():
             url = "https://s3.amazonaws.com/roelandp-nl/btsbots-api-result/"
             #params = "a_s==%s;a_b==%s" % (base, quote);
             params = "%s-%s.json" % (base, quote)
-            response = yield from asyncio.wait_for(self.session.get(
-                url+params), 120)
+            response = yield from asyncio.wait_for(self.session.get(url + params), 120)
             result = yield from response.json()
             order_book_ask = []
             for _o in result["_items"]:
                 order_book_ask.append([_o['p'], _o['b_s']])
             #params = "a_s==%s;a_b==%s" % (quote, base)
             params = "%s-%s.json" % (quote, base)
-            response = yield from asyncio.wait_for(self.session.get(
-                url+params), 120)
+            response = yield from asyncio.wait_for(self.session.get(url + params), 120)
             result = yield from response.json()
             order_book_bid = []
             for _o in result["_items"]:
-                order_book_bid.append([1/_o['p'], _o['b_b']])
-            return {
-                "bids": order_book_bid, "asks": order_book_ask}
+                order_book_bid.append([1 / _o['p'], _o['b_b']])
+            return {"bids": order_book_bid, "asks": order_book_ask}
         except:
-            print("Error fetching book from btsbots - roelandp mod ! - "+ quote)
+            print("Error fetching book from btsbots - roelandp mod ! - " + quote)
 
     @asyncio.coroutine
     def orderbook_poloniex(self, quote="btc", base="bts"):
@@ -128,14 +118,9 @@ class Exchanges():
             quote = quote.upper()
             base = base.upper()
             url = "http://poloniex.com/public"
-            params = {
-                "command": "returnOrderBook",
-                "currencyPair": "%s_%s" % (quote, base),
-                "depth": 150
-                }
+            params = {"command": "returnOrderBook", "currencyPair": "%s_%s" % (quote, base), "depth": 150}
 
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             result = yield from response.json()
             for order_type in self.order_types:
                 for order in result[order_type]:
@@ -153,13 +138,9 @@ class Exchanges():
             quote = quote.upper()
             base = base.upper()
             url = "https://bittrex.com/api/v1.1/public/getorderbook"
-            params = {
-                "type": "both",
-                "market": "%s-%s" % (quote, base)
-                }
+            params = {"type": "both", "market": "%s-%s" % (quote, base)}
 
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             result = yield from response.json()
             result = result['result']
             order_book_ask = []
@@ -180,12 +161,8 @@ class Exchanges():
             quote = quote.lower()
             base = base.lower()
             url = "http://api.zb.cn/data/v1/depth"
-            params = {
-                "market": "%s_%s" % (base, quote),
-                "size": 50
-                }
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {"market": "%s_%s" % (base, quote), "size": 50}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
             for order_type in self.order_types:
@@ -196,8 +173,7 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from zb!")
-            print(e)
+            print("Error fetching book from zb!",e)
 
     @asyncio.coroutine
     def orderbook_lbank(self, quote="btc", base="bts"):
@@ -205,12 +181,8 @@ class Exchanges():
             quote = quote.lower()
             base = base.lower()
             url = "https://api.lbank.info/v1/depth.do"
-            params = {
-                "symbol": "%s_%s" % (base, quote),
-                "size": 60
-                }
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {"symbol": "%s_%s" % (base, quote), "size": 60}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
             for order_type in self.order_types:
@@ -221,8 +193,7 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from lbank!")
-            print(e)
+            print("Error fetching book from lbank!",e)
 
     @asyncio.coroutine
     def orderbook_binance(self, quote="BTC", base="BTS"):
@@ -230,11 +201,8 @@ class Exchanges():
             quote = quote.upper()
             base = base.upper()
             url = "https://www.binance.com/api/v1/depth"
-            params = {
-                "symbol": "%s%s" % (base, quote)
-                }
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {"symbol": "%s%s" % (base, quote)}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
             for order_type in self.order_types:
@@ -244,8 +212,7 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from binance!")
-            print(e)
+            print("Error fetching book from binance!",e)
 
     @asyncio.coroutine
     def orderbook_jubi(self, quote="cny", base="bts"):
@@ -253,11 +220,8 @@ class Exchanges():
             quote = quote.lower()
             base = base.lower()
             url = "https://www.jubi.com/api/v1/depth"
-            params = {
-                "coin": "%s" % (base)
-                }
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {"coin": "%s" % (base)}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
             for order_type in self.order_types:
@@ -268,8 +232,7 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from jubi!")
-            print(e)
+            print("Error fetching book from jubi!",e)
 
     @asyncio.coroutine
     def orderbook_19800(self, quote="cny", base="bts"):
@@ -277,11 +240,8 @@ class Exchanges():
             quote = quote.lower()
             base = base.lower()
             url = "https://www.19800.com/api/v1/depth"
-            params = {
-                "market": "%s_%s" % (quote, base)
-                }
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {"market": "%s_%s" % (quote, base)}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
             result = result['data']
@@ -295,19 +255,14 @@ class Exchanges():
             order_book_bid = sorted(order_book_bid, reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from 19800!")
-            print(e)
+            print("Error fetching book from 19800!",e)
 
     @asyncio.coroutine
     def ticker_fubt(self, quote="FBT", base="BTS"):
         try:
             url = "https://api.fubt.co/v1/market/ticker"
-            params = {
-                "symbol": base+quote,
-                "accessKey":self.config['fubt_key']
-                }
-            response = yield from asyncio.wait_for(self.session.get(
-                url, params=params), 120)
+            params = {"symbol": base + quote, "accessKey": self.config['fubt_key']}
+            response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             result = yield from response.json()
             _ticker = {}
             _ticker["last"] = result['data']["last"]
@@ -322,14 +277,12 @@ class Exchanges():
             _ticker["name"] = "fubt.co"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from fubt.co!")
-            print(e)
+            print("Error fetching ticker from fubt.co!",e)
 
     @asyncio.coroutine
     def ticker_btc38(self, quote="cny", base="bts"):
         try:
-            url = "http://api.btc38.com/v1/ticker.php?c=%s&mk_type=%s" % (
-                base, quote)
+            url = "http://api.btc38.com/v1/ticker.php?c=%s&mk_type=%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -345,8 +298,7 @@ class Exchanges():
             _ticker["name"] = "btc38"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from btc38!")
-            print(e)
+            print("Error fetching ticker from btc38!",e)
 
     @asyncio.coroutine
     def ticker_poloniex(self, quote="USDT", base="BTC"):
@@ -355,8 +307,7 @@ class Exchanges():
             url = "https://poloniex.com/public?command=returnTicker"
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
-            result = json.loads(
-                response.decode("utf-8-sig"))["%s_%s" % (quote, base)]
+            result = json.loads(response.decode("utf-8-sig"))["%s_%s" % (quote, base)]
             _ticker = {}
             _ticker["last"] = result["last"]
             _ticker["vol"] = result["baseVolume"]
@@ -369,17 +320,14 @@ class Exchanges():
             _ticker["name"] = "poloniex"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from poloniex!")
-            print(e)
+            print("Error fetching ticker from poloniex!",e)
 
     @asyncio.coroutine
     def ticker_binance(self, quote="USDT", base="BTC"):
         try:
 
             url = "https://www.binance.com/api/v1/ticker/24hr"
-            params = {
-                "symbol": "%s%s" % (base, quote)
-                }
+            params = {"symbol": "%s%s" % (base, quote)}
             response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -395,14 +343,12 @@ class Exchanges():
             _ticker["name"] = "binance"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from binance!")
-            print(e)
+            print("Error fetching ticker from binance!",e)
 
     @asyncio.coroutine
     def ticker_btcchina(self, quote="cny", base="btc"):
         try:
-            url = "https://data.btcchina.com/data/ticker?market=%s%s" % (
-                base, quote)
+            url = "https://data.btcchina.com/data/ticker?market=%s%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -419,8 +365,7 @@ class Exchanges():
             _ticker["name"] = "btcchina"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from btcchina!")
-            print(e)
+            print("Error fetching ticker from btcchina!",e)
 
     @asyncio.coroutine
     def ticker_huobi(self, base="btc"):
@@ -442,14 +387,12 @@ class Exchanges():
             _ticker["name"] = "huobi"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from huobi!")
-            print(e)
+            print("Error fetching ticker from huobi!",e)
 
     @asyncio.coroutine
     def ticker_okcoin_cn(self, quote="cny", base="btc"):
         try:
-            url = "https://www.okcoin.cn/api/ticker.do?symbol=%s_%s" % (
-                base, quote)
+            url = "https://www.okcoin.cn/api/ticker.do?symbol=%s_%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -466,14 +409,12 @@ class Exchanges():
             _ticker["name"] = "okcoin.cn"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from okcoin cn!")
-            print(e)
+            print("Error fetching ticker from okcoin cn!",e)
 
     @asyncio.coroutine
     def ticker_okcoin_com(self, quote="usd", base="btc"):
         try:
-            url = "https://www.okcoin.com/api/v1/ticker.do?symbol=%s_%s" % (
-                base, quote)
+            url = "https://www.okcoin.com/api/v1/ticker.do?symbol=%s_%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -490,14 +431,12 @@ class Exchanges():
             _ticker['name'] = 'okcoin.com'
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from okcoin com!")
-            print(e)
+            print("Error fetching ticker from okcoin com!",e)
 
     @asyncio.coroutine
     def ticker_gdax(self, quote="usd", base="btc"):
         try:
-            url = "https://api.gdax.com/products/%s-%s/ticker" % (
-                base.upper(), quote.upper())
+            url = "https://api.gdax.com/products/%s-%s/ticker" % (base.upper(), quote.upper())
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -510,20 +449,16 @@ class Exchanges():
                 _ticker[key] = float(_ticker[key])
             _ticker["low"] = None
             _ticker["high"] = None
-            _ticker["time"] = int(
-                datetime.datetime.strptime(
-                    result["time"][:19]+"+0000", "%Y-%m-%dT%H:%M:%S%z").timestamp())
+            _ticker["time"] = int(datetime.datetime.strptime(result["time"][:19] + "+0000", "%Y-%m-%dT%H:%M:%S%z").timestamp())
             _ticker["name"] = "gdax"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from gdax.com!")
-            print(e)
+            print("Error fetching ticker from gdax.com!",e)
 
     @asyncio.coroutine
     def ticker_bitstamp(self, quote="usd", base="btc"):
         try:
-            url = "https://www.bitstamp.net/api/v2/ticker/%s%s" % (
-                base, quote)
+            url = "https://www.bitstamp.net/api/v2/ticker/%s%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -540,14 +475,12 @@ class Exchanges():
             _ticker["name"] = "bitstamp"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from bitstamp.net!")
-            print(e)
+            print("Error fetching ticker from bitstamp.net!",e)
 
     @asyncio.coroutine
     def ticker_btce(self, quote="usd", base="btc"):
         try:
-            url = "https://btc-e.com/api/3/ticker/%s_%s" % (
-                base, quote)
+            url = "https://btc-e.com/api/3/ticker/%s_%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -565,16 +498,14 @@ class Exchanges():
             _ticker["name"] = "btce"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from btc-e.com!")
-            print(e)
+            print("Error fetching ticker from btc-e.com!",e)
 
     @asyncio.coroutine
     def ticker_bitflyer(self, quote="usd", base="btc"):
         try:
             quote = quote.upper()
             base = base.upper()
-            url = "https://api.bitflyer.com/v1/ticker?product_code=%s_%s" % (
-                base, quote)
+            url = "https://api.bitflyer.com/v1/ticker?product_code=%s_%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -586,16 +517,14 @@ class Exchanges():
             _ticker["name"] = "bitflyer_%s" % quote
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from bitflyer.com!")
-            print(e)
+            print("Error fetching ticker from bitflyer.com!",e)
 
     @asyncio.coroutine
     def ticker_bitfinex(self, quote="usd", base="btc"):
         try:
             quote = quote.upper()
             base = base.upper()
-            url = "https://api.bitfinex.com/v2/ticker/t%s%s" % (
-                base, quote)
+            url = "https://api.bitfinex.com/v2/ticker/t%s%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -612,16 +541,14 @@ class Exchanges():
             _ticker["name"] = "bitfinex"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from bitfinex.com!")
-            print(e)
+            print("Error fetching ticker from bitfinex.com!",e)
 
     @asyncio.coroutine
     def ticker_kraken(self, quote="eur", base="btc"):
         try:
             quote = quote.upper()
             base = base.upper()
-            url = "https://api.kraken.com/0/public/Ticker?pair=%s%s" % (
-                base, quote)
+            url = "https://api.kraken.com/0/public/Ticker?pair=%s%s" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
@@ -635,15 +562,16 @@ class Exchanges():
             _ticker["name"] = "kraken"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from kraken.com!")
-            print(e)
+            print("Error fetching ticker from kraken.com!",e)
+
 
 if __name__ == "__main__":
     import json
-    f = open("config.json",encoding='utf-8')
+    f = open("config.json", encoding='utf-8')
     config = json.load(f)
     loop = asyncio.get_event_loop()
     exchanges = Exchanges(config)
+
     @asyncio.coroutine
     def run_task(coro, *args):
         while True:
@@ -671,6 +599,6 @@ if __name__ == "__main__":
         # loop.create_task(run_task(exchanges.ticker_bitfinex)),
         # loop.create_task(run_task(exchanges.ticker_bitflyer, 'jpy', 'btc')),
         # loop.create_task(run_task(exchanges.ticker_bitflyer, "usd", 'btc'))
-        ]
+    ]
     loop.run_until_complete(asyncio.wait(tasks))
     loop.run_forever()

@@ -17,6 +17,7 @@
     "alias": {
         "RUBLE": "RUB"
     },
+    "ver_assets":["CNY","USD","EUR","RUB","BTC"],
     "cli_wallet": {
         "host" : "localhost",
         "port" : 8092,

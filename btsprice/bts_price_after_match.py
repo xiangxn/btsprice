@@ -7,7 +7,6 @@ from btsprice.misc import get_median
 
 
 class BTSPriceAfterMatch(object):
-
     def __init__(self, data):
         self.data = data
         self.timeout = 600  # order book can't use after 300 seconds
@@ -40,21 +39,20 @@ class BTSPriceAfterMatch(object):
         for market in self.market_weight:
             if market not in self.orderbook:
                 continue
-            if len(self.orderbook[market]["bids"]) == 0 or \
-                    len(self.orderbook[market]["asks"]) == 0:
-                    continue
-            _price = (
-                self.orderbook[market]["bids"][0][0] + self.
-                orderbook[market]["asks"][0][0])/2
+            if len(self.orderbook[market]["bids"]) == 0 or len(self.orderbook[market]["asks"]) == 0:
+                continue
+            _price = (self.orderbook[market]["bids"][0][0] + self.orderbook[market]["asks"][0][0]) / 2
             if self.market_weight[market]:
                 valid_price_queue.append(_price)
             valid_price_dict[market] = _price
+        if len(valid_price_queue) == 0:
+            return False
         valid_price = get_median(valid_price_queue)
         for market in list(self.orderbook.keys()):
             if market not in valid_price_dict:
                 del self.orderbook[market]
                 continue
-            change = fabs((valid_price_dict[market] - valid_price)/valid_price)
+            change = fabs((valid_price_dict[market] - valid_price) / valid_price)
             # if offset more than 20%, this market is invalid
             if change > 0.2:
                 del self.orderbook[market]
@@ -68,7 +66,7 @@ class BTSPriceAfterMatch(object):
         rate_list = []
         for source in list(rate):
             if 'CNY' in rate[source]["USD"]:
-                rate_list.append(1/rate[source]["USD"]["CNY"])
+                rate_list.append(1 / rate[source]["USD"]["CNY"])
         return get_median(rate_list)
 
     def compute_rate_cny(self):
@@ -100,9 +98,9 @@ class BTSPriceAfterMatch(object):
                     _rate = rate[source][quote][base] * rate_cny[quote]
                     rate_source[base].append(_rate)
             for asset in rate_source:
-                asset_rate = sum(rate_source[asset])/float(len(rate_source[asset]))
+                asset_rate = sum(rate_source[asset]) / float(len(rate_source[asset]))
                 for _rate in list(rate_source[asset]):
-                    if fabs((_rate - asset_rate)/asset_rate) > 0.1:
+                    if fabs((_rate - asset_rate) / asset_rate) > 0.1:
                         asset_rate = None
                         break
                 if asset_rate:
@@ -111,6 +109,10 @@ class BTSPriceAfterMatch(object):
         rate_cny["TCNY"] = rate_cny["CNY"]
         rate_cny["TUSD"] = rate_cny["USD"]
 
+        rate_cny["CNY1.0"] = rate_cny["CNY"]
+        rate_cny["USD1.0"] = rate_cny["USD"]
+
+        # print("rate_cny",rate_cny)
         # price_btc_queue = {"CNY": [], "USD": []}
         price_btc_queue = []
         price_btc = {}
@@ -141,19 +143,17 @@ class BTSPriceAfterMatch(object):
             self.callback(self.orderbook)
         for market in self.orderbook:
             for order_type in self.order_types:
-                self.global_orderbook[order_type].extend(
-                    self.orderbook[market][order_type])
-        self.global_orderbook["bids"] = sorted(
-            self.global_orderbook["bids"], reverse=True)
+                self.global_orderbook[order_type].extend(self.orderbook[market][order_type])
+        self.global_orderbook["bids"] = sorted(self.global_orderbook["bids"], reverse=True)
         self.global_orderbook["asks"] = sorted(self.global_orderbook["asks"])
 
     def get_spread_orderbook(self, spread=0.01):
         order_bids = []
         order_asks = []
         for order in self.global_orderbook["bids"]:
-            order_bids.append([order[0]*(1 + spread), order[1]])
+            order_bids.append([order[0] * (1 + spread), order[1]])
         for order in self.global_orderbook["asks"]:
-            order_asks.append([order[0]/(1 + spread), order[1]])
+            order_asks.append([order[0] / (1 + spread), order[1]])
         return order_bids, order_asks
 
     def get_price_list(self, order_bids, order_asks):
@@ -169,6 +169,7 @@ class BTSPriceAfterMatch(object):
             if len(price_list) == 0 or order[0] != price_list[-1]:
                 price_list.append(order[0])
         price_list = sorted(price_list)
+        # print("price_list: ",price_list)
         return price_list
 
     def get_match_result(self, order_bids, order_asks, price_list):
@@ -188,8 +189,7 @@ class BTSPriceAfterMatch(object):
         self.timestamp = int(time.time())
         self.compute_rate_cny()
         self.update_orderbook()
-        if len(self.global_orderbook["bids"]) == 0 or \
-                len(self.global_orderbook["asks"]) == 0:
+        if len(self.global_orderbook["bids"]) == 0 or len(self.global_orderbook["asks"]) == 0:
             return [0.0, 0.0, None]
         order_bids, order_asks = self.get_spread_orderbook(spread)
         price_list = self.get_price_list(order_bids, order_asks)
@@ -197,31 +197,32 @@ class BTSPriceAfterMatch(object):
             return [0.0, 0.0, (order_bids[0][0] + order_asks[0][0]) / 2]
         match_result = []
         while True:
-            bid_volume, ask_volume, median_price = self.get_match_result(
-                order_bids, order_asks, price_list)
+            bid_volume, ask_volume, median_price = self.get_match_result(order_bids, order_asks, price_list)
             # we need to find a price, which can match the max volume
-            match_result.append([min(bid_volume, ask_volume),
-                                 -(bid_volume+ask_volume), median_price])
+            match_result.append([min(bid_volume, ask_volume), -(bid_volume + ask_volume), median_price])
             if len(price_list) <= 1:
                 break
-            if(bid_volume <= ask_volume):
+            if (bid_volume <= ask_volume):
                 price_list = price_list[:int(len(price_list) / 2)]
             else:
                 price_list = price_list[int(len(price_list) / 2):]
 
         match_result = sorted(match_result, reverse=True)
-        #print(match_result)
+        # print("match_result: ",match_result)
         return match_result[0]
 
     def get_valid_depth(self, price, spread=0.01):
         valid_depth = {}
-        bid_price = price / (1+spread)
-        ask_price = price * (1+spread)
+        bid_price = price / (1 + spread)
+        ask_price = price * (1 + spread)
         for market in self.orderbook:
             quote = self.orderbook[market]["quote"]
             valid_depth[market] = {
-                "bid_price": bid_price / self.rate_cny[quote], "bid_volume": 0,
-                "ask_price": ask_price / self.rate_cny[quote], "ask_volume": 0}
+                "bid_price": bid_price / self.rate_cny[quote],
+                "bid_volume": 0,
+                "ask_price": ask_price / self.rate_cny[quote],
+                "ask_volume": 0
+            }
             for order in sorted(self.orderbook[market]["bids"], reverse=True):
                 if order[0] < bid_price:
                     #print(market)
@@ -242,7 +243,10 @@ class BTSPriceAfterMatch(object):
         return self.data["magic"]["Magicwallet"]
 
     def get_okexc2c_btc_price(self):
-        return self.data["okexc2c"]["c2cbtc"]
+        if "okexc2c" in self.data and "c2cbtc" in self.data['okexc2c']:
+            return self.data["okexc2c"]["c2cbtc"]
+        return None
+
 
 if __name__ == "__main__":
     import asyncio
@@ -259,18 +263,15 @@ if __name__ == "__main__":
     def task_compute_price():
         yield from asyncio.sleep(1)
         while True:
-            volume, volume_sum, real_price = bts_price.compute_price(
-                spread=0.01)
+            volume, volume_sum, real_price = bts_price.compute_price(spread=0.01)
             if real_price:
-                valid_depth = bts_price.get_valid_depth(
-                    price=real_price,
-                    spread=0.01)
-                print(
-                    "price:%.5f CNY/BTS, volume:%.3f" % (real_price, volume))
+                valid_depth = bts_price.get_valid_depth(price=real_price, spread=0.01)
+                print("price:%.5f CNY/BTS, volume:%.3f" % (real_price, volume))
                 print("efficent depth : %s" % valid_depth)
             else:
                 print("can't get valid market order")
             yield from asyncio.sleep(10)
+
     loop.create_task(task_compute_price())
     loop.run_forever()
     loop.close()
