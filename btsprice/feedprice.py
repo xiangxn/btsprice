@@ -158,6 +158,7 @@ class FeedPrice(object):
             self.filter_price = self.get_median_price(bts_price_in_cny)
         else:
             self.filter_price = self.get_max_price(bts_price_in_cny)
+        self.filter_price = self.proc_asset_tag(bts_price_in_cny)
 
     def get_median_price(self, bts_price_in_cny):
         median_price = {}
@@ -399,14 +400,18 @@ class FeedPrice(object):
         ready_publish = {}
         for oneprice in prices:
             if oneprice in self.config["ver_assets"]:
-                ready_publish["{}{}".format(oneprice,tag)] = prices[oneprice]
+                ready_publish[oneprice] = prices[oneprice]
+                ver_asset = "{}{}".format(oneprice,tag)
+                if ver_asset in self.config['asset_list']:
+                    ready_publish[ver_asset] = prices[oneprice]
+            else:
+                ready_publish[oneprice] = prices[oneprice]
         if ready_publish:
             return ready_publish
         return prices
 
     def task_publish_price(self):
         nf = self.config["negative_feedback"]
-        self.filter_price = self.proc_asset_tag(self.filter_price)
         if nf == 1:
             self.filter_price = self.price_negative_feedback(self.filter_price)
         elif nf == 2:
