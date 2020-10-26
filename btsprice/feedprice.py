@@ -399,13 +399,12 @@ class FeedPrice(object):
     def proc_asset_tag(self, prices, tag="1.0"):
         ready_publish = {}
         for oneprice in prices:
+            ready_publish[oneprice] = prices[oneprice]
             if oneprice in self.config["ver_assets"]:
-                ready_publish[oneprice] = prices[oneprice]
                 ver_asset = "{}{}".format(oneprice,tag)
                 if ver_asset in self.config['asset_list']:
                     ready_publish[ver_asset] = prices[oneprice]
-            else:
-                ready_publish[oneprice] = prices[oneprice]
+                
         if ready_publish:
             return ready_publish
         return prices
