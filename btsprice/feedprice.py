@@ -237,8 +237,13 @@ class FeedPrice(object):
             else:
                 _alias = asset
             _rate_cny = "%.3f" % (self.bts_price.rate_cny[_alias])
-            _price_bts1 = "%.8f" % self.price_queue[_alias][-1]
-            _price_bts2 = "%.3f" % (1 / self.price_queue[_alias][-1])
+            if _alias in self.price_queue:
+                _price_bts1 = "%.8f" % self.price_queue[_alias][-1]
+                _price_bts2 = "%.3f" % (1 / self.price_queue[_alias][-1])
+            else:
+                _alias_source = _alias.replace("1.0","")
+                _price_bts1 = "%.8f" % self.price_queue[_alias_source][-1]
+                _price_bts2 = "%.3f" % (1 / self.price_queue[_alias_source][-1])
             _median_bts1 = "%.8f" % self.filter_price[_alias]
             _median_bts2 = "%.3f" % (1 / self.filter_price[_alias])
             if self.feedapi and self.feedapi.my_feeds and asset in self.feedapi.my_feeds:
