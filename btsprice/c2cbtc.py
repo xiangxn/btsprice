@@ -29,6 +29,7 @@ class C2CBTC():
         except Exception as e:
             print("Error fetching price from c2c okex!")
             print("err:", e)
+            return None
 
     
 

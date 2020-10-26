@@ -19,8 +19,8 @@ class Exchanges():
     @asyncio.coroutine
     def orderbook_aex(self, quote="cnc", base="bts"):
         try:
-            url = "http://api.aex.plus/depth.php"
-            params = {'c': base, 'mk_type': quote}
+            url = "http://api.aex.plus/v3/depth.php"
+            params = {'coinname': base, 'mk_type': quote}
             response = yield from asyncio.wait_for(self.session.get(
                 url, params=params), 120)
             response = yield from response.read()
