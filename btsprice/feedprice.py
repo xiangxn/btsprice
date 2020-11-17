@@ -323,7 +323,7 @@ class FeedPrice(object):
             custom = None
             if oneprice in self.config['asset_config']:
                 custom = self.config['asset_config'][oneprice]
-            print("real_price[oneprice]: ",real_price[oneprice])
+            print("real_price[oneprice]: ",oneprice, real_price[oneprice])
             if custom and "black_min" in custom:
                 minr = custom["black_min"]
                 if minr != 0:
