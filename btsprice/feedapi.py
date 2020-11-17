@@ -236,7 +236,10 @@ class FeedApi(object):
         self.rpc.set_fees_on_builder_transaction(handle, "1.3.0")
 
         # Signing and Broadcast
-        self.rpc.sign_builder_transaction(handle, True)
+        try:
+            self.rpc.sign_builder_transaction(handle, True)
+        except Exception as e:
+            print(e)
 
         if wallet_was_unlocked:
             self.rpc.lock()
