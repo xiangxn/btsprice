@@ -320,9 +320,11 @@ class FeedPrice(object):
     def price_add_by_black(self, real_price):
         ready_publish = {}
         for oneprice in real_price:
-            custom = self.config['asset_config'][oneprice]
+            custom = None
+            if oneprice in self.config['asset_config']:
+                custom = self.config['asset_config'][oneprice]
             print("real_price[oneprice]: ",real_price[oneprice])
-            if "black_min" in custom:
+            if custom and "black_min" in custom:
                 minr = custom["black_min"]
                 if minr != 0:
                     b_price = self.feedapi.fetch_black_price(oneprice)
