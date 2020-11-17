@@ -319,10 +319,17 @@ class FeedPrice(object):
 
     def price_add_by_black(self, real_price):
         ready_publish = {}
-        minr = self.config["black_min"]
         for oneprice in real_price:
-            if oneprice == "CNY":
-                ready_publish[oneprice] = real_price[oneprice] * minr
+            custom = self.config['asset_config'][oneprice]
+            print("real_price[oneprice]: ",real_price[oneprice])
+            if "black_min" in custom:
+                minr = custom["black_min"]
+                if minr != 0:
+                    b_price = self.feedapi.fetch_black_price(oneprice)
+                    if real_price[oneprice] <= b_price:
+                        ready_publish[oneprice] = b_price * minr
+                else:
+                    ready_publish[oneprice] = real_price[oneprice]
             else:
                 ready_publish[oneprice] = real_price[oneprice]
         btc_price = self.bts_price.get_okexc2c_btc_price()

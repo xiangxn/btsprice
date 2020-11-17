@@ -199,6 +199,16 @@ class FeedApi(object):
                     self.my_feeds[asset] = {}
                     self.my_feeds[asset]["timestamp"] = ptimestamp
                     self.my_feeds[asset]["price"] = self.decode_feed(feed[1][1]["settlement_price"])
+    
+    def fetch_black_price(self,symbol,count=1):
+        order = self.rpc.get_call_orders(symbol,count)
+        feed_data = self.rpc.get_bitasset_data(symbol)
+        mssr = feed_data['current_feed']['maximum_short_squeeze_ratio']
+        debt = int(order[0]['debt'])
+        collateral = int(order[0]['collateral'])
+        black_price = mssr*debt/collateral
+        # print("mssr: ",mssr,black_price)
+        return 1/black_price
 
     def publish_feed(self, feeds, bts_price):
         print("publish_feed:", feeds)
