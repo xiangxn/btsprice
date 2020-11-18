@@ -285,7 +285,7 @@ class FeedPrice(object):
             if self.config["price_limit"]["check_blackswan"] == 1 and self.feedapi.is_blackswan(asset):
                 continue
             if asset not in my_feeds:
-                need_publish[asset] = real_price[asset]
+                # need_publish[asset] = real_price[asset]
                 continue
             change = fabs(my_feeds[asset]["price"] - real_price[asset]) * 100.0 / my_feeds[asset]["price"]
             if change >= self.config["price_limit"]["change_max"]:
@@ -438,7 +438,7 @@ class FeedPrice(object):
             return
         self.feedapi.fetch_feed()
         self.proc_baip2()
-        print("task_publish_price",self.filter_price)
+        # print("task_publish_price",self.filter_price)
         feed_need_publish = self.check_publish(self.feedapi.asset_list + list(self.alias), self.feedapi.my_feeds, self.filter_price)
         if feed_need_publish:
             self.logger.info("publish feeds: %s" % feed_need_publish)
