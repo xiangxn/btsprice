@@ -227,9 +227,9 @@ class TaskExchanges(object):
             loop.create_task(self.fetch_orderbook(
                 "fubt_usdt", "USD",
                 self.exchanges.orderbook_fubt, "USDT", "BTS")),
-            loop.create_task(self.fetch_orderbook(
-                "lbank_btc", "BTC",
-                self.exchanges.orderbook_lbank, "btc", "bts")),
+            # loop.create_task(self.fetch_orderbook(
+            #     "lbank_btc", "BTC",
+            #     self.exchanges.orderbook_lbank, "btc", "bts")),
             loop.create_task(self.fetch_orderbook(
                 "binance_btc", "BTC",
                 self.exchanges.orderbook_binance, "btc", "bts")),

@@ -285,7 +285,7 @@ class FeedPrice(object):
             if self.config["price_limit"]["check_blackswan"] == 1 and self.feedapi.is_blackswan(asset):
                 continue
             if asset not in my_feeds:
-                # need_publish[asset] = real_price[asset]
+                need_publish[asset] = real_price[asset]
                 continue
             change = fabs(my_feeds[asset]["price"] - real_price[asset]) * 100.0 / my_feeds[asset]["price"]
             if change >= self.config["price_limit"]["change_max"]:
@@ -441,30 +441,30 @@ class FeedPrice(object):
         # print("task_publish_price",self.filter_price)
         feed_need_publish = self.check_publish(self.feedapi.asset_list + list(self.alias), self.feedapi.my_feeds, self.filter_price)
         if feed_need_publish:
-            self.logger.info("publish feeds: %s" % feed_need_publish)
-            self.feedapi.publish_feed(feed_need_publish, self.filter_price["CNY"])
+            btscny = self.filter_price["CNY"]
+            feed_list = {}
+            for asset in feed_need_publish:
+                if asset in self.feedapi.my_feeds:
+                    feed_list[asset] = feed_need_publish[asset]
+            self.logger.info("publish feeds: %s" % feed_list)
+            self.feedapi.publish_feed(feed_need_publish, btscny)
 
     @asyncio.coroutine
     def run_task(self):
         config_timer = int(self.config["timer_minute"]) * 60
-        while True:
-            # try:
-            #     self.task_get_price()
-            #     #print("run_task:",self.filter_price)
-            #     if self.filter_price:
-            #         self.task_publish_price()
-            # except Exception as e:
-            #     print("feedprice error:", e)
-            #     self.logger.exception(e)
-            self.task_get_price()
-            #print("run_task:",self.filter_price)
-            if self.filter_price:
-                self.task_publish_price()
-            if self.filter_price:
-                timer = config_timer
-            else:
-                timer = 3
-            yield from asyncio.sleep(timer)
+        try:
+            while True:
+                self.task_get_price()
+                #print("run_task:",self.filter_price)
+                if self.filter_price:
+                    self.task_publish_price()
+                if self.filter_price:
+                    timer = config_timer
+                else:
+                    timer = 3
+                yield from asyncio.sleep(timer)
+        except Exception as e:
+            print("Error: ",e)
 
     def execute(self):
         loop = asyncio.get_event_loop()
