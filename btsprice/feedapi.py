@@ -182,12 +182,10 @@ class FeedApi(object):
             return 0
         return float(base_amount / quote_amount)
 
-    def is_com_wit_feed(self, asset):
+    def is_com_wit_feed(self, asset,f=0x80):
         obj = self.asset_info[asset]
         flags = obj['options']['flags']
-        wf = 0x80
-        cf = 0x100
-        return (flags & (wf | cf)) == wf | cf
+        return (flags & f) == f
 
     def fetch_feed(self):
         for asset in self.asset_list + list(self.alias):
