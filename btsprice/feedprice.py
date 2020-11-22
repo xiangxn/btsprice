@@ -447,7 +447,7 @@ class FeedPrice(object):
         if feed_need_publish:
             feed_list = {}
             for asset in feed_need_publish:
-                if asset in self.feedapi.my_feeds:
+                if asset in self.feedapi.my_feeds or self.feedapi.is_com_wit_feed(asset):
                     feed_list[asset] = feed_need_publish[asset]
             self.logger.info("publish feeds: %s" % feed_list)
             self.feedapi.publish_feed(feed_list, btscny)
