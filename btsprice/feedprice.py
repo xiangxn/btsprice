@@ -450,7 +450,7 @@ class FeedPrice(object):
                 if asset in self.feedapi.my_feeds:
                     feed_list[asset] = feed_need_publish[asset]
             self.logger.info("publish feeds: %s" % feed_list)
-            self.feedapi.publish_feed(feed_need_publish, btscny)
+            self.feedapi.publish_feed(feed_list, btscny)
 
     @asyncio.coroutine
     def run_task(self):
