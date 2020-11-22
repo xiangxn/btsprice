@@ -19,7 +19,7 @@ class Exchanges():
 
     @asyncio.coroutine
     def orderbook_aex(self, quote="cnc", base="bts"):
-        print("fetching book from aex!", quote, base)
+        # print("fetching book from aex!", quote, base)
         try:
             url = "http://api.aex.zone/v3/depth.php"
             params = {'coinname': base, 'mk_type': quote}
@@ -434,8 +434,6 @@ class Exchanges():
                 _ticker[key] = float(_ticker[key])
             _ticker["time"] = int(time.mktime(time.strptime(result['timestamp'],"%Y-%m-%dT%H:%M:%S.%fZ")))
             _ticker['name'] = 'okcoin.com'
-            import time
-            time.mktime()
             return _ticker
         except Exception as e:
             print("Error fetching ticker from okcoin.com!", base, quote, e)

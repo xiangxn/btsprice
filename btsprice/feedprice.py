@@ -331,6 +331,8 @@ class FeedPrice(object):
                     b_price = self.feedapi.fetch_black_price(oneprice)
                     if real_price[oneprice] <= b_price:
                         ready_publish[oneprice] = b_price * minr
+                    else:
+                        ready_publish[oneprice] = real_price[oneprice]
                 else:
                     ready_publish[oneprice] = real_price[oneprice]
             else:
