@@ -8,7 +8,10 @@ import time
 
 class Exchanges():
     def __init__(self, config=None):
-        header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36', 'Accept': '*/*'}
+        header = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
+            'Accept': '*/*'
+        }
 
         self.session = aiohttp.ClientSession(headers=header)
         self.order_types = ["bids", "asks"]
@@ -16,7 +19,7 @@ class Exchanges():
 
     @asyncio.coroutine
     def orderbook_aex(self, quote="cnc", base="bts"):
-        print("fetching book from aex!",quote,base)
+        print("fetching book from aex!", quote, base)
         try:
             url = "http://api.aex.zone/v3/depth.php"
             params = {'coinname': base, 'mk_type': quote}
@@ -52,7 +55,7 @@ class Exchanges():
 
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from fubt!",e)
+            print("Error fetching book from fubt!", e)
 
     @asyncio.coroutine
     def orderbook_bter(self, quote="cny", base="bts"):
@@ -173,7 +176,7 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from zb!",e)
+            print("Error fetching book from zb!", e)
 
     @asyncio.coroutine
     def orderbook_lbank(self, quote="btc", base="bts"):
@@ -193,14 +196,14 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from lbank!",e)
+            print("Error fetching book from lbank!", e)
 
     @asyncio.coroutine
     def orderbook_binance(self, quote="BTC", base="BTS"):
         try:
             quote = quote.upper()
             base = base.upper()
-            url = "https://www.binance.com/api/v1/depth"
+            url = "https://api.binance.com/api/v3/depth"
             params = {"symbol": "%s%s" % (base, quote)}
             response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
             response = yield from response.read()
@@ -212,7 +215,7 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from binance!",e)
+            print("Error fetching book from binance!", e)
 
     @asyncio.coroutine
     def orderbook_jubi(self, quote="cny", base="bts"):
@@ -232,7 +235,7 @@ class Exchanges():
             order_book_bid = sorted(result["bids"], reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from jubi!",e)
+            print("Error fetching book from jubi!", e)
 
     @asyncio.coroutine
     def orderbook_19800(self, quote="cny", base="bts"):
@@ -255,7 +258,7 @@ class Exchanges():
             order_book_bid = sorted(order_book_bid, reverse=True)
             return {"bids": order_book_bid, "asks": order_book_ask}
         except Exception as e:
-            print("Error fetching book from 19800!",e)
+            print("Error fetching book from 19800!", e)
 
     @asyncio.coroutine
     def ticker_fubt(self, quote="FBT", base="BTS"):
@@ -277,7 +280,7 @@ class Exchanges():
             _ticker["name"] = "fubt.co"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from fubt.co!",e)
+            print("Error fetching ticker from fubt.co!", e)
 
     @asyncio.coroutine
     def ticker_btc38(self, quote="cny", base="bts"):
@@ -298,7 +301,7 @@ class Exchanges():
             _ticker["name"] = "btc38"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from btc38!",e)
+            print("Error fetching ticker from btc38!", e)
 
     @asyncio.coroutine
     def ticker_poloniex(self, quote="USDT", base="BTC"):
@@ -320,7 +323,7 @@ class Exchanges():
             _ticker["name"] = "poloniex"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from poloniex!",e)
+            print("Error fetching ticker from poloniex!", e)
 
     @asyncio.coroutine
     def ticker_binance(self, quote="USDT", base="BTC"):
@@ -343,7 +346,7 @@ class Exchanges():
             _ticker["name"] = "binance"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from binance!",e)
+            print("Error fetching ticker from binance!", e)
 
     @asyncio.coroutine
     def ticker_btcchina(self, quote="cny", base="btc"):
@@ -365,7 +368,7 @@ class Exchanges():
             _ticker["name"] = "btcchina"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from btcchina!",e)
+            print("Error fetching ticker from btcchina!", e)
 
     @asyncio.coroutine
     def ticker_huobi(self, base="btc"):
@@ -387,7 +390,7 @@ class Exchanges():
             _ticker["name"] = "huobi"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from huobi!",e)
+            print("Error fetching ticker from huobi!", e)
 
     @asyncio.coroutine
     def ticker_okcoin_cn(self, quote="cny", base="btc"):
@@ -409,29 +412,29 @@ class Exchanges():
             _ticker["name"] = "okcoin.cn"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from okcoin cn!",e)
+            print("Error fetching ticker from okcoin cn!", e)
 
     @asyncio.coroutine
     def ticker_okcoin_com(self, quote="usd", base="btc"):
         try:
-            url = "https://www.okcoin.com/api/v1/ticker.do?symbol=%s_%s" % (base, quote)
+            url = "https://www.okcoin.com/api/spot/v3/instruments/%s-%s/ticker" % (base, quote)
             response = yield from asyncio.wait_for(self.session.get(url), 120)
             response = yield from response.read()
             result = json.loads(response.decode("utf-8-sig"))
             _ticker = {}
-            _ticker["last"] = result['ticker']["last"]
-            _ticker["vol"] = result['ticker']["vol"]
-            _ticker["buy"] = result['ticker']["buy"]
-            _ticker["sell"] = result['ticker']["sell"]
-            _ticker["low"] = result['ticker']["low"]
-            _ticker["high"] = result['ticker']["high"]
+            _ticker["last"] = result["last"]
+            _ticker["vol"] = result["base_volume_24h"]
+            _ticker["buy"] = result["ask"]
+            _ticker["sell"] = result["bid"]
+            _ticker["low"] = result["low_24h"]
+            _ticker["high"] = result["high_24h"]
             for key in _ticker:
                 _ticker[key] = float(_ticker[key])
             _ticker["time"] = int(result['date'])
             _ticker['name'] = 'okcoin.com'
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from okcoin com!",e)
+            print("Error fetching ticker from okcoin.com!", base, quote, e)
 
     @asyncio.coroutine
     def ticker_gdax(self, quote="usd", base="btc"):
@@ -453,7 +456,7 @@ class Exchanges():
             _ticker["name"] = "gdax"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from gdax.com!",e)
+            print("Error fetching ticker from gdax.com!", e)
 
     @asyncio.coroutine
     def ticker_bitstamp(self, quote="usd", base="btc"):
@@ -475,7 +478,7 @@ class Exchanges():
             _ticker["name"] = "bitstamp"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from bitstamp.net!",e)
+            print("Error fetching ticker from bitstamp.net!", e)
 
     @asyncio.coroutine
     def ticker_btce(self, quote="usd", base="btc"):
@@ -498,7 +501,7 @@ class Exchanges():
             _ticker["name"] = "btce"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from btc-e.com!",e)
+            print("Error fetching ticker from btc-e.com!", e)
 
     @asyncio.coroutine
     def ticker_bitflyer(self, quote="usd", base="btc"):
@@ -517,7 +520,7 @@ class Exchanges():
             _ticker["name"] = "bitflyer_%s" % quote
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from bitflyer.com!",e)
+            print("Error fetching ticker from bitflyer.com!", e)
 
     @asyncio.coroutine
     def ticker_bitfinex(self, quote="usd", base="btc"):
@@ -541,7 +544,7 @@ class Exchanges():
             _ticker["name"] = "bitfinex"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from bitfinex.com!",e)
+            print("Error fetching ticker from bitfinex.com!", e)
 
     @asyncio.coroutine
     def ticker_kraken(self, quote="eur", base="btc"):
@@ -562,7 +565,7 @@ class Exchanges():
             _ticker["name"] = "kraken"
             return _ticker
         except Exception as e:
-            print("Error fetching ticker from kraken.com!",e)
+            print("Error fetching ticker from kraken.com!", e)
 
 
 if __name__ == "__main__":
@@ -582,9 +585,9 @@ if __name__ == "__main__":
     tasks = [
         # loop.create_task(run_task(exchanges.orderbook_btsbots)),
         # loop.create_task(run_task(exchanges.orderbook_btsbots, "OPEN.BTC", "BTS")),
-        loop.create_task(run_task(exchanges.orderbook_aex))
+        loop.create_task(run_task(exchanges.orderbook_aex)),
         # loop.create_task(run_task(exchanges.orderbook_lbank, "BTC", "BTS"))
-        #loop.create_task(run_task(exchanges.orderbook_binance))
+        loop.create_task(run_task(exchanges.orderbook_binance)),
         #loop.create_task(run_task(exchanges.orderbook_fubt,"FBT","BTS"))
         #loop.create_task(run_task(exchanges.ticker_fubt))
         # loop.create_task(run_task(exchanges.orderbook_19800))
@@ -595,7 +598,8 @@ if __name__ == "__main__":
         # loop.create_task(run_task(exchanges.ticker_btcchina)),
         # loop.create_task(run_task(exchanges.ticker_huobi)),
         # loop.create_task(run_task(exchanges.ticker_okcoin_cn)),
-        # loop.create_task(run_task(exchanges.ticker_okcoin_com))
+        loop.create_task(run_task(exchanges.ticker_okcoin_com)),
+        loop.create_task(run_task(exchanges.ticker_binance,'USDT','BTC'))
         # loop.create_task(run_task(exchanges.ticker_bitfinex)),
         # loop.create_task(run_task(exchanges.ticker_bitflyer, 'jpy', 'btc')),
         # loop.create_task(run_task(exchanges.ticker_bitflyer, "usd", 'btc'))

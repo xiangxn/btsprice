@@ -438,10 +438,10 @@ class FeedPrice(object):
             return
         self.feedapi.fetch_feed()
         self.proc_baip2()
+        btscny = self.filter_price["CNY"]
         # print("task_publish_price",self.filter_price)
         feed_need_publish = self.check_publish(self.feedapi.asset_list + list(self.alias), self.feedapi.my_feeds, self.filter_price)
         if feed_need_publish:
-            btscny = self.filter_price["CNY"]
             feed_list = {}
             for asset in feed_need_publish:
                 if asset in self.feedapi.my_feeds:

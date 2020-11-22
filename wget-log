@@ -1,0 +1,15 @@
+--2020-11-22 11:44:16--  http://api.aex.zone/v3/depth.php?coinname=BTS
+正在解析主机 api.aex.zone (api.aex.zone)... 150.109.29.134
+正在连接 api.aex.zone (api.aex.zone)|150.109.29.134|:80... 已连接。
+已发出 HTTP 请求，正在等待回应... 302 Moved Temporarily
+位置：https://api.aex.zone/v3/depth.php?coinname=BTS [跟随至新的 URL]
+--2020-11-22 11:44:16--  https://api.aex.zone/v3/depth.php?coinname=BTS
+正在连接 api.aex.zone (api.aex.zone)|150.109.29.134|:443... 已连接。
+已发出 HTTP 请求，正在等待回应... 200 OK
+长度：12 [application/json]
+正在保存至: “depth.php?coinname=BTS”
+
+depth.php?coinname=BTS                  0%[                                                                          ]       0  --.-KB/s               depth.php?coinname=BTS                100%[=========================================================================>]      12  --.-KB/s  用时 0s      
+
+2020-11-22 11:44:16 (651 KB/s) - 已保存 “depth.php?coinname=BTS” [12/12])
+
