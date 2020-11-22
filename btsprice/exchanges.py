@@ -25,8 +25,10 @@ class Exchanges():
             params = {'coinname': base, 'mk_type': quote}
             # print("params: ",params)
             response = yield from asyncio.wait_for(self.session.get(url, params=params), 120)
-            response = yield from response.read()
-            result = json.loads(response.decode("utf-8-sig"))
+            # response = yield from response.read()
+            # result = json.loads(response.decode("utf-8-sig"))
+            result = yield from response.json()
+            result = result['data']
             for order_type in self.order_types:
                 for order in result[order_type]:
                     order[0] = float(order[0])
@@ -430,8 +432,10 @@ class Exchanges():
             _ticker["high"] = result["high_24h"]
             for key in _ticker:
                 _ticker[key] = float(_ticker[key])
-            _ticker["time"] = int(result['date'])
+            _ticker["time"] = int(time.mktime(time.strptime(result['timestamp'],"%Y-%m-%dT%H:%M:%S.%fZ")))
             _ticker['name'] = 'okcoin.com'
+            import time
+            time.mktime()
             return _ticker
         except Exception as e:
             print("Error fetching ticker from okcoin.com!", base, quote, e)

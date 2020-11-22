@@ -159,6 +159,7 @@ class FeedPrice(object):
         else:
             self.filter_price = self.get_max_price(bts_price_in_cny)
         self.filter_price = self.proc_asset_tag(self.filter_price)
+        print("self.filter_price: ",self.filter_price)
 
     def get_median_price(self, bts_price_in_cny):
         median_price = {}
